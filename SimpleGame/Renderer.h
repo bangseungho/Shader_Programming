@@ -22,14 +22,19 @@ public:
 
 private:
 	void CreateParticle(int numParticle);
+	
 
 	GLuint m_ParticleShader = -1;
+	void SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
 
 	GLuint m_ParticlePositionVBO = -1;
 	GLuint m_ParticleColorVBO = -1;
 	GLuint m_ParticleVelocityVBO = -1;
 	GLuint m_ParticleEmitTimeVBO = -1;
-	GLuint m_ParticleLifeTimeVBO = -1;
+	GLuint m_ParticleLifeTimeVBO = -1;	
+	GLuint m_ParticlePeriodVBO = -1;
+	GLuint m_ParticleAmpVBO = -1;
+	GLuint m_ParticleValueVBO = -1;
 
 private:
 	float m_VerticesCount = 0;
