@@ -25,7 +25,8 @@ private:
 	
 
 	GLuint m_ParticleShader = -1;
-	void SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
+	int SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
+	void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset);
 
 	GLuint m_ParticlePositionVBO = -1;
 	GLuint m_ParticleColorVBO = -1;
@@ -35,6 +36,7 @@ private:
 	GLuint m_ParticlePeriodVBO = -1;
 	GLuint m_ParticleAmpVBO = -1;
 	GLuint m_ParticleValueVBO = -1;
+	GLuint m_ParticlePosColorVelVBO = -1;
 
 private:
 	float m_VerticesCount = 0;

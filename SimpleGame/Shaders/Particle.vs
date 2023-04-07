@@ -7,17 +7,17 @@ in float a_LifeTime;
 in float a_Period;
 in float a_Amp;
 in float a_Value;
+in vec4 a_Color;
+
+out vec4 v_Color;
+out float c_T;
 
 uniform vec4 u_Trans;
 uniform float u_Time;
 
-const vec3 c_Gravity = vec3(0.0, -0.8, 0.0);
-
-in vec3 a_Color;
-out vec3 v_Color;
-out float c_T;
-
 const float c_PI = 3.141592;
+const float c_Vel = 0.1;
+const vec3 c_Gravity = vec3(0.0, -1.8, 0.0);
 
 vec4 RocketFire()
 {
@@ -30,13 +30,13 @@ vec4 RocketFire()
 	}
 	else
 	{
-		float newT = a_LifeTime * fract(t/a_LifeTime);
+		float newT = a_LifeTime * fract(t/a_LifeTime) * c_Vel;
 
 		float nX = sin(a_Value * 2.0 * c_PI);
 		float nY = cos(a_Value * 2.0 * c_PI);
 
-		newPosition.x = a_Position.x + nX + newT*a_Vel.x;
-		newPosition.y = a_Position.y + nY + newT*a_Vel.y;
+		newPosition.x = a_Position.x + nX + newT * a_Vel.x;
+		newPosition.y = a_Position.y + nY + newT * a_Vel.y;
 		
 		vec2 newDir = vec2(-a_Vel.y, a_Vel.x);
 		newDir = normalize(newDir);
@@ -78,6 +78,7 @@ vec4 FireWork()
 
 void main()
 {
-	// gl_Position = FireWork();
 	gl_Position = RocketFire();
+	// gl_Position = FireWork();
+	v_Color = a_Color;
 }

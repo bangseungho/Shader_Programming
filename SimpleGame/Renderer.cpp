@@ -6,21 +6,22 @@
 using namespace std;
 
 default_random_engine dre;
-uniform_real_distribution urdColor{0.f, 1.f};
+uniform_real_distribution urdColor{0.f, 1.0f};
 uniform_real_distribution urdPos{-1.f, 1.f};
-uniform_real_distribution urdVelX{-0.3f, 0.3f};
-uniform_real_distribution urdVelY{0.9f, 1.6f};
+uniform_real_distribution urdVelX{-1.f, 1.f};
+uniform_real_distribution urdVelY{0.f, 2.f};
 uniform_real_distribution urdEmitTime{0.f, 10.f};
 uniform_real_distribution urdLifeTime{0.f, 1.f};
-uniform_real_distribution urdPeriod{0.1f, 0.3f};
-uniform_real_distribution urdAmp{0.f, 3.f};
+uniform_real_distribution urdPeriod{0.f, 1.f};
+uniform_real_distribution urdAmp{-1.f, 1.f};
 uniform_real_distribution urdValue{0.f, 1.f};
+
+#pragma region DOIT
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
 }
-
 
 Renderer::~Renderer()
 {
@@ -40,7 +41,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	CreateParticle(10000);
+	CreateParticle(20000);
 
 	m_Timer = new Timer();
 
@@ -203,31 +204,51 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size)
+int Renderer::SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size)
 {
 	int attribLoc = -1;
 	attribLoc = glGetAttribLocation(shaderProgram, attribName);
 	glEnableVertexAttribArray(attribLoc);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glVertexAttribPointer(attribLoc, size, GL_FLOAT, GL_FALSE, 0, 0);
+	return attribLoc;
+}
+
+#pragma endregion
+
+void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset)
+{
+	glEnableVertexAttribArray(attribLoc);
+	glVertexAttribPointer(attribLoc, size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * offset));
 }
 
 void Renderer::DrawParticleEffect()
 {
 	m_Timer->Update();
-	//cout << m_Timer->GetDeltaTime() << endl;
 
 	int shaderProgram = m_ParticleShader;
 	glUseProgram(shaderProgram);
 
-	SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
-	SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
-	SetAttribVBO(shaderProgram, "a_Velocity", m_ParticleVelocityVBO, 3);
-	SetAttribVBO(shaderProgram, "a_EmitTime", m_ParticleEmitTimeVBO, 1);
-	SetAttribVBO(shaderProgram, "a_LifeTime", m_ParticleLifeTimeVBO, 1);
-	SetAttribVBO(shaderProgram, "a_Period", m_ParticlePeriodVBO, 1);
-	SetAttribVBO(shaderProgram, "a_Amp", m_ParticleAmpVBO, 1);
-	SetAttribVBO(shaderProgram, "a_Value", m_ParticleValueVBO, 1);
+	//int posAttribLoc = SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
+	//int colorAttribLoc = SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
+	//int velocityAttribLoc = SetAttribVBO(shaderProgram, "a_Vel", m_ParticleVelocityVBO, 3);
+	int emitAttribLoc = SetAttribVBO(shaderProgram, "a_EmitTime", m_ParticleEmitTimeVBO, 1);
+	int lifeAttribLoc = SetAttribVBO(shaderProgram, "a_LifeTime", m_ParticleLifeTimeVBO, 1);
+	int	periodAttribLoc = SetAttribVBO(shaderProgram, "a_Period", m_ParticlePeriodVBO, 1);
+	int ampAttribLoc = SetAttribVBO(shaderProgram, "a_Amp", m_ParticleAmpVBO, 1);
+	int valueAttribLoc = SetAttribVBO(shaderProgram, "a_Value", m_ParticleValueVBO, 1);
+
+	int posAttribLoc = -1;
+	posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
+	int colorAttribLoc = -1;
+	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");	
+	int velocityAttribLoc = -1;
+	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelVBO);
+	SetAttribute(posAttribLoc, 3, 10, 0);
+	SetAttribute(colorAttribLoc, 4, 10, 3);
+	SetAttribute(velocityAttribLoc, 3, 10, 7);
 
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
@@ -236,20 +257,25 @@ void Renderer::DrawParticleEffect()
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
 }
 
+
 void Renderer::CreateParticle(int numParticle)
 {
-	m_ParticleSize = 0.005f;
-
+	m_ParticleSize = 0.004f;
+	float centerX = 0.f;
+	float centerY = 0.f;
 	int particleCount = numParticle;
 	m_ParticleVerticesCount = particleCount * 6;
 	int floatCount = particleCount * 6 * 3;
+	int floatCountPosColor = particleCount * 6 * (3 + 4 + 3);
+
 
 	// Position
+	// 총 파티클 버텍스의 x, y, z 값을 설정한다.
 	std::vector<float> verticesPosition;
 
 	for (int i = 0; i < particleCount; ++i) {
-		float centerX = 0;
-		float centerY = 0.0;
+		centerX = 0.f;
+		centerY = 0.f;
 
 		// 1
 		verticesPosition.push_back(centerX - m_ParticleSize);
@@ -287,12 +313,18 @@ void Renderer::CreateParticle(int numParticle)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesPosition[0], GL_STATIC_DRAW);
 
 	// Color
+	// RGB 세 개의 값이 버텍스 하나에 들어가야 하기 때문에
+	// attribPointer에서 size는 3임
 	std::vector<float> verticesColor;
 
 	for (int i = 0; i < particleCount; ++i) {
 		float colorR = urdColor(dre);
 		float colorG = urdColor(dre);
 		float colorB = urdColor(dre);
+
+		verticesColor.push_back(colorR);
+		verticesColor.push_back(colorG);
+		verticesColor.push_back(colorB);
 
 		for (int i = 0; i < 6; ++i) {
 			verticesColor.push_back(colorR);
@@ -419,6 +451,92 @@ void Renderer::CreateParticle(int numParticle)
 	glGenBuffers(1, &m_ParticleValueVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_ParticleValueVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountSingle, &verticesValue[0], GL_STATIC_DRAW);
+
+	// PosColor
+	std::vector<float> verticesPosColorVel;
+
+	for (int i = 0; i < particleCount; ++i) {
+		centerX = 0.f;
+		centerY = 0.f;
+		float colorR = urdColor(dre);
+		float colorG = urdColor(dre);
+		float colorB = urdColor(dre);
+		float colorA = urdColor(dre);
+		float velocityX = urdVelX(dre);
+		float velocityY = urdVelY(dre);
+
+		// 1
+		verticesPosColorVel.push_back(centerX - m_ParticleSize);
+		verticesPosColorVel.push_back(centerY + m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+		// 2
+		verticesPosColorVel.push_back(centerX - m_ParticleSize);
+		verticesPosColorVel.push_back(centerY - m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+		// 3
+		verticesPosColorVel.push_back(centerX + m_ParticleSize);
+		verticesPosColorVel.push_back(centerY + m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+		// 4
+		verticesPosColorVel.push_back(centerX + m_ParticleSize);
+		verticesPosColorVel.push_back(centerY + m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+		// 5
+		verticesPosColorVel.push_back(centerX - m_ParticleSize);
+		verticesPosColorVel.push_back(centerY - m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+		// 6
+		verticesPosColorVel.push_back(centerX + m_ParticleSize);
+		verticesPosColorVel.push_back(centerY - m_ParticleSize);
+		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVel.push_back(colorR);
+		verticesPosColorVel.push_back(colorG);
+		verticesPosColorVel.push_back(colorB);
+		verticesPosColorVel.push_back(colorA);
+		verticesPosColorVel.push_back(velocityX);
+		verticesPosColorVel.push_back(velocityY);
+		verticesPosColorVel.push_back(0.f);
+	}
+
+	glGenBuffers(1, &m_ParticlePosColorVelVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountPosColor, &verticesPosColorVel[0], GL_STATIC_DRAW);
+
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
