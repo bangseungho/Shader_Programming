@@ -19,6 +19,7 @@ public:
 	bool IsInitialized();
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawParticleEffect();
+	void DrawFragmentSandbox();
 
 private:
 	void CreateParticle(int numParticle);
@@ -37,6 +38,9 @@ private:
 	GLuint m_ParticleAmpVBO = -1;
 	GLuint m_ParticleValueVBO = -1;
 	GLuint m_ParticlePosColorVelVBO = -1;
+
+	GLuint m_FragmentSandboxShader = -1;
+	GLuint m_FragmentSandboxVBO = -1;
 
 private:
 	float m_VerticesCount = 0;

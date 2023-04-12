@@ -18,8 +18,9 @@ uniform float u_Time;
 const float c_PI = 3.141592;
 const float c_Vel = 0.1;
 const vec3 c_Gravity = vec3(0.0, -1.8, 0.0);
+float newAlpha = 0.0;
 
-vec4 RocketFire()
+void RocketFire()
 {
 	float t = u_Time - a_EmitTime;
 	vec4 newPosition = vec4(0, 0, 0, 1);
@@ -31,7 +32,6 @@ vec4 RocketFire()
 	else
 	{
 		float newT = a_LifeTime * fract(t/a_LifeTime) * c_Vel;
-
 		float nX = sin(a_Value * 2.0 * c_PI);
 		float nY = cos(a_Value * 2.0 * c_PI);
 
@@ -43,13 +43,15 @@ vec4 RocketFire()
 
 		newPosition.xy += newT*a_Amp*sin(a_Period * newT * 2.0 * c_PI) * 
 							newDir;
-	
+		
+		newAlpha = 1.0 - newT / a_LifeTime;
 	}
 
-	return newPosition;
+	gl_Position = newPosition;
+	v_Color = vec4(a_Color.rgb, a_Color.a * newAlpha);
 }
 
-vec4 FireWork()
+void FireWork()
 {
 	float t = u_Time - a_EmitTime;
 	
@@ -71,14 +73,13 @@ vec4 FireWork()
 		newPosition.w= 1;
 	}
 
-	v_Color = a_Color;
+	gl_Position = newPosition;
 
-	return newPosition;
+	v_Color = a_Color;
 }
 
 void main()
 {
-	gl_Position = RocketFire();
-	// gl_Position = FireWork();
-	v_Color = a_Color;
+	RocketFire();
+	// FireWork();
 }

@@ -49,10 +49,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\SolidRect.fs">
+    <None Include="Shaders\FragmentSandbox.fs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\SolidRect.vs">
+    <None Include="Shaders\FragmentSandbox.vs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
     <None Include="Shaders\Particle.vs">

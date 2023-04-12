@@ -182,8 +182,8 @@
   <ItemGroup>
     <None Include="Shaders\Particle.fs" />
     <None Include="Shaders\Particle.vs" />
-    <None Include="Shaders\SolidRect.fs" />
-    <None Include="Shaders\SolidRect.vs" />
+    <None Include="Shaders\FragmentSandbox.fs" />
+    <None Include="Shaders\FragmentSandbox.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

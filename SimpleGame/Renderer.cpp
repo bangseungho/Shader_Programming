@@ -37,6 +37,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Load shaders
 	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
+	m_FragmentSandboxShader = CompileShaders("./Shaders/FragmentSandbox.vs", "./Shaders/FragmentSandbox.fs");
 
 	//Create VBOs
 	CreateVertexBufferObjects();
@@ -229,6 +230,9 @@ void Renderer::DrawParticleEffect()
 	int shaderProgram = m_ParticleShader;
 	glUseProgram(shaderProgram);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	//int posAttribLoc = SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
 	//int colorAttribLoc = SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
 	//int velocityAttribLoc = SetAttribVBO(shaderProgram, "a_Vel", m_ParticleVelocityVBO, 3);
@@ -255,6 +259,28 @@ void Renderer::DrawParticleEffect()
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
+	glDisable(GL_BLEND); // 다른 함수에서도 사용하기 때문에 꺼야함 나중에
+}
+
+void Renderer::DrawFragmentSandbox()
+{
+	GLuint shader = m_FragmentSandboxShader;
+	glUseProgram(shader);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int posLoc = glGetAttribLocation(shader, "a_Position");
+	int texLoc = glGetAttribLocation(shader, "a_Texcoord");
+	glEnableVertexAttribArray(posLoc);
+	glEnableVertexAttribArray(texLoc);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 5, 0);
+	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 
@@ -537,6 +563,19 @@ void Renderer::CreateParticle(int numParticle)
 	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountPosColor, &verticesPosColorVel[0], GL_STATIC_DRAW);
 
+	float rect1[] =
+	{
+		-1.f, -1.f, 0.f,	0.f, 1.f,
+		-1.f, 1.f, 0.f,		0.f, 0.f,
+		1.f, 1.f, 0.f,		1.f, 0.f,
+		-1.f, -1.f, 0.f,	0.f, 1.f,
+		1.f, 1.f, 0.f,		1.f, 0.f,
+		1.f, -1.f, 0.f,		1.f, 1.f
+	};
+
+	glGenBuffers(1, &m_FragmentSandboxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rect1), rect1, GL_STATIC_DRAW);
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
