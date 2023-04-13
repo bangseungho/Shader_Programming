@@ -11,7 +11,7 @@ uniform_real_distribution urdPos{-1.f, 1.f};
 uniform_real_distribution urdVelX{-1.f, 1.f};
 uniform_real_distribution urdVelY{0.f, 2.f};
 uniform_real_distribution urdEmitTime{0.f, 10.f};
-uniform_real_distribution urdLifeTime{0.f, 1.f};
+uniform_real_distribution urdLifeTime{0.f, 3.f};
 uniform_real_distribution urdPeriod{0.f, 1.f};
 uniform_real_distribution urdAmp{-1.f, 1.f};
 uniform_real_distribution urdValue{0.f, 1.f};

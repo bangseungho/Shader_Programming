@@ -3,6 +3,7 @@
 out vec4 FragColor;
 
 in vec2 v_Texcoord;
+uniform float u_Time;
 
 void test()
 {
@@ -20,7 +21,7 @@ void circle()
 {
 	vec2 temp = v_Texcoord - vec2(0.5, 0.5);
 	float d = length(temp);
-	float value = sin(30 * d);
+	float value = sin(d * 30);
 
 	FragColor = vec4(value);
 

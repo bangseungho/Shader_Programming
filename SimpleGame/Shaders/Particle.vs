@@ -44,11 +44,10 @@ void RocketFire()
 		newPosition.xy += newT*a_Amp*sin(a_Period * newT * 2.0 * c_PI) * 
 							newDir;
 		
-		newAlpha = 1.0 - newT / a_LifeTime;
+		newAlpha = 1.0 - newT / a_LifeTime / c_Vel;
 	}
-
+	v_Color = vec4(a_Color.r * newAlpha, newAlpha, newAlpha, a_Color.a * newAlpha);
 	gl_Position = newPosition;
-	v_Color = vec4(a_Color.rgb, a_Color.a * newAlpha);
 }
 
 void FireWork()
