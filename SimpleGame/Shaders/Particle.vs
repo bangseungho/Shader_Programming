@@ -8,8 +8,10 @@ in float a_Period;
 in float a_Amp;
 in float a_Value;
 in vec4 a_Color;
+in vec2 a_Texcoord;
 
 out vec4 v_Color;
+out vec2 v_Texcoord;
 out float c_T;
 
 uniform vec4 u_Trans;
@@ -46,7 +48,11 @@ void RocketFire()
 		
 		newAlpha = 1.0 - newT / a_LifeTime / c_Vel;
 	}
-	v_Color = vec4(a_Color.r * newAlpha, newAlpha, newAlpha, a_Color.a * newAlpha);
+	v_Color = vec4(a_Color.r * a_Texcoord.r, 
+				   a_Color.g * a_Texcoord.g, 
+				   a_Color.b, a_Color.a) * vec4(newAlpha);
+
+	v_Texcoord = a_Texcoord;
 	gl_Position = newPosition;
 }
 

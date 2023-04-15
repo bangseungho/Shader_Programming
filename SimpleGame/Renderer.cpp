@@ -42,7 +42,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
-	CreateParticle(20000);
+	CreateParticle(2000);
 
 	m_Timer = new Timer();
 
@@ -248,15 +248,26 @@ void Renderer::DrawParticleEffect()
 	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");	
 	int velocityAttribLoc = -1;
 	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
+	int uvAttribLoc = -1;
+	uvAttribLoc = glGetAttribLocation(shaderProgram, "a_Texcoord");
 
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelVBO);
-	SetAttribute(posAttribLoc, 3, 10, 0);
-	SetAttribute(colorAttribLoc, 4, 10, 3);
-	SetAttribute(velocityAttribLoc, 3, 10, 7);
+	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelUVVBO);
+	SetAttribute(posAttribLoc, 3, 12, 0);
+	SetAttribute(colorAttribLoc, 4, 12, 3);
+	SetAttribute(velocityAttribLoc, 3, 12, 7);
+	SetAttribute(uvAttribLoc, 2, 12, 10);
 
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
+	
+	static float period = 1;
+	
+	//static float m = 0.005;
+	//if (period >= 50 || period <= 0)
+	//	m *= -1;
+	//period += m;
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Period"), period);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
 	glDisable(GL_BLEND); // 다른 함수에서도 사용하기 때문에 꺼야함 나중에
@@ -264,6 +275,8 @@ void Renderer::DrawParticleEffect()
 
 void Renderer::DrawFragmentSandbox()
 {
+	m_Timer->Update();
+
 	GLuint shader = m_FragmentSandboxShader;
 	glUseProgram(shader);
 	glEnable(GL_BLEND);
@@ -280,108 +293,124 @@ void Renderer::DrawFragmentSandbox()
 	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE,
 		sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
 
+	float x = 0.5f;
+	float y = 0.f;
+	glUniform2f(glGetUniformLocation(shader, "u_Point"), x, y);
+
+	float points[] = { 0.5f, 0.5f,
+					   0.f, 0.f,
+					   1.f, 1.f };
+
+	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
+
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 
 void Renderer::CreateParticle(int numParticle)
 {
-	m_ParticleSize = 0.004f;
+	m_ParticleSize = 0.05f;
 	float centerX = 0.f;
 	float centerY = 0.f;
 	int particleCount = numParticle;
 	m_ParticleVerticesCount = particleCount * 6;
 	int floatCount = particleCount * 6 * 3;
-	int floatCountPosColor = particleCount * 6 * (3 + 4 + 3);
+	int floatCountPosColorVelUV = particleCount * 6 * (3 + 4 + 3 + 2);
 
+#pragma region PosCorVel
+	//// Position
+	//// 총 파티클 버텍스의 x, y, z 값을 설정한다.
+	//std::vector<float> verticesPosition;
 
-	// Position
-	// 총 파티클 버텍스의 x, y, z 값을 설정한다.
-	std::vector<float> verticesPosition;
+	//for (int i = 0; i < particleCount; ++i) {
+	//	centerX = 0.f;
+	//	centerY = 0.f;
 
-	for (int i = 0; i < particleCount; ++i) {
-		centerX = 0.f;
-		centerY = 0.f;
+	//	// 1
+	//	verticesPosition.push_back(centerX - m_ParticleSize);
+	//	verticesPosition.push_back(centerY + m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
+	//	
+	//	// 2
+	//	verticesPosition.push_back(centerX -m_ParticleSize);
+	//	verticesPosition.push_back(centerY -m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
 
-		// 1
-		verticesPosition.push_back(centerX - m_ParticleSize);
-		verticesPosition.push_back(centerY + m_ParticleSize);
-		verticesPosition.push_back(0.f);
-		
-		// 2
-		verticesPosition.push_back(centerX -m_ParticleSize);
-		verticesPosition.push_back(centerY -m_ParticleSize);
-		verticesPosition.push_back(0.f);
+	//	// 3
+	//	verticesPosition.push_back(centerX + m_ParticleSize);
+	//	verticesPosition.push_back(centerY + m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
 
-		// 3
-		verticesPosition.push_back(centerX + m_ParticleSize);
-		verticesPosition.push_back(centerY + m_ParticleSize);
-		verticesPosition.push_back(0.f);
+	//	// 4
+	//	verticesPosition.push_back(centerX + m_ParticleSize);
+	//	verticesPosition.push_back(centerY + m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
 
-		// 4
-		verticesPosition.push_back(centerX + m_ParticleSize);
-		verticesPosition.push_back(centerY + m_ParticleSize);
-		verticesPosition.push_back(0.f);
+	//	// 5
+	//	verticesPosition.push_back(centerX -m_ParticleSize);
+	//	verticesPosition.push_back(centerY -m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
 
-		// 5
-		verticesPosition.push_back(centerX -m_ParticleSize);
-		verticesPosition.push_back(centerY -m_ParticleSize);
-		verticesPosition.push_back(0.f);
+	//	// 6
+	//	verticesPosition.push_back(centerX + m_ParticleSize);
+	//	verticesPosition.push_back(centerY - m_ParticleSize);
+	//	verticesPosition.push_back(0.f);
+	//}
 
-		// 6
-		verticesPosition.push_back(centerX + m_ParticleSize);
-		verticesPosition.push_back(centerY - m_ParticleSize);
-		verticesPosition.push_back(0.f);
-	}
+	//glGenBuffers(1, &m_ParticlePositionVBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePositionVBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesPosition[0], GL_STATIC_DRAW);
 
-	glGenBuffers(1, &m_ParticlePositionVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePositionVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesPosition[0], GL_STATIC_DRAW);
+	//// Color
+	//// RGB 세 개의 값이 버텍스 하나에 들어가야 하기 때문에
+	//// attribPointer에서 size는 3임
+	//std::vector<float> verticesColor;
 
-	// Color
-	// RGB 세 개의 값이 버텍스 하나에 들어가야 하기 때문에
-	// attribPointer에서 size는 3임
-	std::vector<float> verticesColor;
+	//for (int i = 0; i < particleCount; ++i) {
+	//	float colorR = urdColor(dre);
+	//	float colorG = urdColor(dre);
+	//	float colorB = urdColor(dre);
 
-	for (int i = 0; i < particleCount; ++i) {
-		float colorR = urdColor(dre);
-		float colorG = urdColor(dre);
-		float colorB = urdColor(dre);
+	//	verticesColor.push_back(colorR);
+	//	verticesColor.push_back(colorG);
+	//	verticesColor.push_back(colorB);
 
-		verticesColor.push_back(colorR);
-		verticesColor.push_back(colorG);
-		verticesColor.push_back(colorB);
+	//	for (int i = 0; i < 6; ++i) {
+	//		verticesColor.push_back(colorR);
+	//		verticesColor.push_back(colorG);
+	//		verticesColor.push_back(colorB);
+	//	}
+	//}
 
-		for (int i = 0; i < 6; ++i) {
-			verticesColor.push_back(colorR);
-			verticesColor.push_back(colorG);
-			verticesColor.push_back(colorB);
-		}
-	}
+	//glGenBuffers(1, &m_ParticleColorVBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticleColorVBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesColor[0], GL_STATIC_DRAW);
 
-	glGenBuffers(1, &m_ParticleColorVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticleColorVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesColor[0], GL_STATIC_DRAW);
+	//// Velocity
+	//std::vector<float> verticesVelocity;
 
-	// Velocity
-	std::vector<float> verticesVelocity;
+	//for (int i = 0; i < particleCount; ++i) {
 
-	for (int i = 0; i < particleCount; ++i) {
+	//	float velocityX = urdVelX(dre);
+	//	float velocityY = urdVelY(dre);
 
-		float velocityX = urdVelX(dre);
-		float velocityY = urdVelY(dre);
+	//	for (int i = 0; i < 6; ++i) {
+	//		verticesVelocity.push_back(velocityX);
+	//		verticesVelocity.push_back(velocityY);
+	//		verticesVelocity.push_back(0.f);
+	//	}
+	//}
 
-		for (int i = 0; i < 6; ++i) {
-			verticesVelocity.push_back(velocityX);
-			verticesVelocity.push_back(velocityY);
-			verticesVelocity.push_back(0.f);
-		}
-	}
+	//glGenBuffers(1, &m_ParticleVelocityVBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticleVelocityVBO);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesVelocity[0], GL_STATIC_DRAW);
+#pragma endregion
 
-	glGenBuffers(1, &m_ParticleVelocityVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticleVelocityVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesVelocity[0], GL_STATIC_DRAW);
-
+#pragma region Time
 	// EmitTime
 	std::vector<float> verticesEmitTime;
 	int floatCountSingle = particleCount * 6;
@@ -477,9 +506,10 @@ void Renderer::CreateParticle(int numParticle)
 	glGenBuffers(1, &m_ParticleValueVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_ParticleValueVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountSingle, &verticesValue[0], GL_STATIC_DRAW);
+#pragma endregion
 
 	// PosColor
-	std::vector<float> verticesPosColorVel;
+	std::vector<float> verticesPosColorVelUV;
 
 	for (int i = 0; i < particleCount; ++i) {
 		centerX = 0.f;
@@ -492,77 +522,90 @@ void Renderer::CreateParticle(int numParticle)
 		float velocityY = urdVelY(dre);
 
 		// 1
-		verticesPosColorVel.push_back(centerX - m_ParticleSize);
-		verticesPosColorVel.push_back(centerY + m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX - m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY + m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(0.f);
 		// 2
-		verticesPosColorVel.push_back(centerX - m_ParticleSize);
-		verticesPosColorVel.push_back(centerY - m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX - m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY - m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(1.f);
 		// 3
-		verticesPosColorVel.push_back(centerX + m_ParticleSize);
-		verticesPosColorVel.push_back(centerY + m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX + m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY + m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(1.f);
+		verticesPosColorVelUV.push_back(0.f);
 		// 4
-		verticesPosColorVel.push_back(centerX + m_ParticleSize);
-		verticesPosColorVel.push_back(centerY + m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX + m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY + m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(1.f);
+		verticesPosColorVelUV.push_back(0.f);
 		// 5
-		verticesPosColorVel.push_back(centerX - m_ParticleSize);
-		verticesPosColorVel.push_back(centerY - m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX - m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY - m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(1.f);
 		// 6
-		verticesPosColorVel.push_back(centerX + m_ParticleSize);
-		verticesPosColorVel.push_back(centerY - m_ParticleSize);
-		verticesPosColorVel.push_back(0.f);
-		verticesPosColorVel.push_back(colorR);
-		verticesPosColorVel.push_back(colorG);
-		verticesPosColorVel.push_back(colorB);
-		verticesPosColorVel.push_back(colorA);
-		verticesPosColorVel.push_back(velocityX);
-		verticesPosColorVel.push_back(velocityY);
-		verticesPosColorVel.push_back(0.f);
+		verticesPosColorVelUV.push_back(centerX + m_ParticleSize);
+		verticesPosColorVelUV.push_back(centerY - m_ParticleSize);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(colorR);
+		verticesPosColorVelUV.push_back(colorG);
+		verticesPosColorVelUV.push_back(colorB);
+		verticesPosColorVelUV.push_back(colorA);
+		verticesPosColorVelUV.push_back(velocityX);
+		verticesPosColorVelUV.push_back(velocityY);
+		verticesPosColorVelUV.push_back(0.f);
+		verticesPosColorVelUV.push_back(1.f);
+		verticesPosColorVelUV.push_back(1.f);
 	}
 
-	glGenBuffers(1, &m_ParticlePosColorVelVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountPosColor, &verticesPosColorVel[0], GL_STATIC_DRAW);
+	glGenBuffers(1, &m_ParticlePosColorVelUVVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelUVVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountPosColorVelUV, &verticesPosColorVelUV[0], GL_STATIC_DRAW);
 
+#pragma region Sandbox
 	float rect1[] =
 	{
 		-1.f, -1.f, 0.f,	0.f, 1.f,
@@ -576,6 +619,7 @@ void Renderer::CreateParticle(int numParticle)
 	glGenBuffers(1, &m_FragmentSandboxVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect1), rect1, GL_STATIC_DRAW);
+#pragma endregion
 }
 
 void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)

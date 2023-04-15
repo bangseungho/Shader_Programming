@@ -23,7 +23,6 @@ public:
 
 private:
 	void CreateParticle(int numParticle);
-	
 
 	GLuint m_ParticleShader = -1;
 	int SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
@@ -37,8 +36,9 @@ private:
 	GLuint m_ParticlePeriodVBO = -1;
 	GLuint m_ParticleAmpVBO = -1;
 	GLuint m_ParticleValueVBO = -1;
-	GLuint m_ParticlePosColorVelVBO = -1;
+	GLuint m_ParticlePosColorVelUVVBO = -1;
 
+public:
 	GLuint m_FragmentSandboxShader = -1;
 	GLuint m_FragmentSandboxVBO = -1;
 
