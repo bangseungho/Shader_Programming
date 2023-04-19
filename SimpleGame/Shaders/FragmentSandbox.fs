@@ -38,9 +38,9 @@ void circle()
 
 void Rader()
 {
-	vec2 temp = v_Texcoord - vec2(0.5, 1.0);
+	vec2 temp = v_Texcoord - vec2(0.5, 0.5);
 	float d = length(temp);	
-	float value = 0.2 * (pow(sin(c_PI * 2 * d - u_Time ), 20) - 0.5);
+	float value = 0.2 * (pow(sin(c_PI * 2 * d - u_Time * 4), 20) - 0.5);
 	float temp1 = ceil(value);
 
 	vec4 result = vec4(0);

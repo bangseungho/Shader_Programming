@@ -8,8 +8,8 @@ void main()
 {
 	float value = PI * (a_Position.x + 1.0);
 	float d = a_Position.x + 1.f;
-	float newY = d * sin(value - u_Time);
+	float newY = d * sin(value - u_Time * 5.0);
 	vec4 newPosition = vec4(a_Position, 1.0);
-	newPosition.y = newY;
+	newPosition.y = newY / 3.f;
 	gl_Position = newPosition;
 }
