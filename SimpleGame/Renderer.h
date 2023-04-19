@@ -20,6 +20,8 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawParticleEffect();
 	void DrawFragmentSandbox();
+	void DrawAlphaClear();
+	void DrawVertexSandbox();
 
 private:
 	void CreateParticle(int numParticle);
@@ -27,6 +29,7 @@ private:
 	GLuint m_ParticleShader = -1;
 	int SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
 	void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset);
+
 
 	GLuint m_ParticlePositionVBO = -1;
 	GLuint m_ParticleColorVBO = -1;
@@ -37,6 +40,14 @@ private:
 	GLuint m_ParticleAmpVBO = -1;
 	GLuint m_ParticleValueVBO = -1;
 	GLuint m_ParticlePosColorVelUVVBO = -1;
+
+	GLuint m_AlphaClearShader = -1;
+	GLuint m_AlphaClearVBO = -1;
+
+	GLuint m_VertexSandboxShader = -1;
+	GLuint m_HoriLineVBO = -1;
+	GLuint m_HoriLineVertexCount = 0;
+	
 
 public:
 	GLuint m_FragmentSandboxShader = -1;

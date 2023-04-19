@@ -1,5 +1,9 @@
 ﻿  Renderer.cpp
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(86,34): warning C4267: '=': 'size_t'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(261,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(307,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(88,34): warning C4267: '=': 'size_t'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(257,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(260,15): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(263,15): warning C4305: '+=': 'double'에서 'float'(으)로 잘립니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(302,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(348,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(684,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
   SimpleGame.vcxproj -> C:\GitHub\Shader_Programming\x64\Debug\SimpleGame.exe

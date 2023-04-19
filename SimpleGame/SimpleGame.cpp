@@ -16,16 +16,22 @@ but WITHOUT ANY WARRANTY.
 #include "Renderer.h"
 
 Renderer *g_Renderer = NULL;
+constexpr int g_WindowSizeX = 512;
+constexpr int g_WindowSizeY = 512;
 
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	//glClear(GL_COLOR_BUFFER_BIT);
+
+	g_Renderer->DrawAlphaClear();
 
 	// Renderer Test
 	//g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
 
-	g_Renderer->DrawFragmentSandbox();
+	//g_Renderer->DrawFragmentSandbox();
+	g_Renderer->DrawVertexSandbox();
 	//g_Renderer->DrawParticleEffect();
 
 	glutSwapBuffers();
@@ -56,8 +62,8 @@ int main(int argc, char **argv)
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(1000, 300);
-	glutInitWindowSize(500, 500);
+	glutInitWindowPosition(0, 0);
+	glutInitWindowSize(g_WindowSizeX, g_WindowSizeY);
 	glutCreateWindow("Game Software Engineering KPU");
 
 	glewInit();
@@ -71,7 +77,7 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
+	g_Renderer = new Renderer(g_WindowSizeX, g_WindowSizeY);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";

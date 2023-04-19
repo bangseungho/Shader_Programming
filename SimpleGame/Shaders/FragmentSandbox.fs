@@ -38,22 +38,19 @@ void circle()
 
 void Rader()
 {
-	/*vec4 result = vec4(0);
-	 for(int i = 0; i<3; ++i){
-		vec2 temp = v_Texcoord - u_Points[i];
+	vec2 temp = v_Texcoord - vec2(0.5, 1.0);
+	float d = length(temp);	
+	float value = 0.2 * (pow(sin(c_PI * 2 * d - u_Time ), 20) - 0.5);
+	float temp1 = ceil(value);
+
+	vec4 result = vec4(0);
+	for(int i = 0; i<3; i++){
+		vec2 temp = v_Texcoord - u_Point[i];
 		float d = length(temp);
 
-		if(d < 0.1){
-			result += 1.0;
+		if(d < 0.03){
+			result += 1.0 * temp1;
 		}
-	} */
-	vec2 temp = v_Texcoord - u_Points[0];
-	float d = length(temp);	
-	float value = 0.3 * pow(sin(c_PI * 2 * d - 5 * u_Time ), 20);
-	float temp0 = ceil(value)
-
-	if(d < 0.1){
-		result += 1.0;
 	}
 
 	FragColor = vec4(result + 10 * value);
