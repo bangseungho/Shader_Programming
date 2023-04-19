@@ -6,10 +6,10 @@ uniform float u_Time;
 const float PI = 3.141592;
 void main()
 {
-	float value = PI * (a_Position.x + 1.0);
-	float d = a_Position.x + 1.f;
-	float newY = d * sin(value - u_Time * 5.0);
+	float value = 2 *PI * (a_Position.x + 1.0);
+	float d = a_Position.x + 1.0;
+	float newY = d * sin(value - 10 * u_Time);
 	vec4 newPosition = vec4(a_Position, 1.0);
-	newPosition.y = newY / 3.f;
+	newPosition.y = newY / 5.0;
 	gl_Position = newPosition;
 }

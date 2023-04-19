@@ -35,7 +35,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_WindowSizeY = windowSizeY;
 
 	//Load shaders
-	m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
+	//m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
 	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
 	m_FragmentSandboxShader = CompileShaders("./Shaders/FragmentSandbox.vs", "./Shaders/FragmentSandbox.fs");
 	m_AlphaClearShader = CompileShaders("./Shaders/AlphaClear.vs", "./Shaders/AlphaClear.fs");
@@ -46,12 +46,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 
 	m_Timer = new Timer();
-
-	if (m_SolidRectShader > 0 && m_VBORect > 0)
-	{
-		m_Initialized = true;
-	}
 	CreateParticle(1000);
+
+	//if (m_SolidRectShader > 0 && m_VBORect > 0)
+	//{
+	//	m_Initialized = true;
+	//}
 }
 
 bool Renderer::IsInitialized()
@@ -256,11 +256,11 @@ void Renderer::DrawVertexSandbox()
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
 
-	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
-	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
 
-	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 2.f);
-	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 2.f);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
 }
 
 void Renderer::DrawParticleEffect()
