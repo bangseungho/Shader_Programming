@@ -46,7 +46,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 
 	m_Timer = new Timer();
-	CreateParticle(1000);
+	CreateParticle(10000);
 
 	//if (m_SolidRectShader > 0 && m_VBORect > 0)
 	//{
@@ -250,17 +250,22 @@ void Renderer::DrawVertexSandbox()
 	GLuint posAttribLoc = glGetAttribLocation(shader, "a_Position");
 	glBindBuffer(GL_ARRAY_BUFFER, m_HoriLineVBO);
 	SetAttribute(posAttribLoc, 3, 0, 0);
-		
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
 
-	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
-	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 0.5f);
+	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
 
-	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 2.f);
-	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
+	glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+
+	glDisable(GL_BLEND);
 }
 
 void Renderer::DrawParticleEffect()
@@ -353,7 +358,7 @@ void Renderer::DrawFragmentSandbox()
 
 void Renderer::CreateParticle(int numParticle)
 {
-	m_ParticleSize = 0.002f;
+	m_ParticleSize = 0.005f;
 	float centerX = 0.f;
 	float centerY = 0.f;
 	int particleCount = numParticle;
