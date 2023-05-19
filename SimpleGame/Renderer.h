@@ -22,6 +22,7 @@ public:
 	void DrawFragmentSandbox();
 	void DrawAlphaClear();
 	void DrawVertexSandbox();
+	void DrawTextureSandbox();
 
 private:
 	void CreateParticle(int numParticle);
@@ -53,6 +54,11 @@ public:
 	GLuint m_FragmentSandboxShader = -1;
 	GLuint m_FragmentSandboxVBO = -1;
 
+	GLuint m_TextureSandboxShader = -1;
+	GLuint m_TextureSandboxVBO = -1;
+	GLuint m_CheckerBoardTexture = -1;
+	GLuint m_RGBTexture = -1;
+
 private:
 	float m_VerticesCount = 0;
 	float m_ParticleSize = 0;
@@ -68,6 +74,8 @@ private:
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void CreateTextures();
+	GLuint CreatePngTexture(char* filePath, GLuint saplingMethod);
 
 	bool m_Initialized = false;
 	

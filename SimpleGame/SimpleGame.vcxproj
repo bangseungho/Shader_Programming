@@ -163,12 +163,14 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SimpleGame.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -186,6 +188,8 @@
     <None Include="Shaders\Particle.vs" />
     <None Include="Shaders\FragmentSandbox.fs" />
     <None Include="Shaders\FragmentSandbox.vs" />
+    <None Include="Shaders\TextureSandbox.fs" />
+    <None Include="Shaders\TextureSandbox.vs" />
     <None Include="Shaders\VertexSandbox.fs" />
     <None Include="Shaders\VertexSandbox.vs" />
   </ItemGroup>

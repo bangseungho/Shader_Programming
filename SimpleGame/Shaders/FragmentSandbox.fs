@@ -74,7 +74,30 @@ void Flag()
 	FragColor = vec4(finalColor);
 }
 
+void Ttest()
+{
+	float finalColor = 0;
+	for(int i=0; i<10; i++)
+	{
+		float newTime = u_Time * 0.1 + i*0.2;
+		float newColor = v_Texcoord.x*0.5*
+				sin(v_Texcoord.x*c_PI*2 - 10*newTime);
+		float sinValue = sin(v_Texcoord.x*c_PI*2*10 - 500*newTime);
+		float width = 0.01*v_Texcoord.x*5+0.001;
+		if(2.0*(v_Texcoord.y-0.5) > newColor && 
+		   2.0*(v_Texcoord.y-0.5) < newColor + width)
+		{
+			finalColor += 1*sinValue*(1.0-v_Texcoord.x);
+		}
+		else
+		{
+		}
+	}
+	FragColor = vec4(finalColor);
+}
+
 void main()
 {
 	Flag();
+	Ttest();
 }
