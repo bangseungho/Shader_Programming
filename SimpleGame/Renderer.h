@@ -66,7 +66,7 @@ private:
 
 public:
 	Timer* m_Timer;
-
+	void DrawGridMesh();
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
 	bool ReadFile(char* filename, std::string *target);
@@ -76,6 +76,8 @@ private:
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void CreateTextures();
 	GLuint CreatePngTexture(char* filePath, GLuint saplingMethod);
+	void CreateGridMesh();
+
 
 	bool m_Initialized = false;
 	
@@ -84,5 +86,9 @@ private:
 
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
+
+	GLuint m_GridMeshShader = 0;
+	GLuint m_GridMeshVertexCount = 0;
+	GLuint m_GridMeshVBO = 0;
 };
 

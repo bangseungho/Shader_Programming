@@ -21,15 +21,16 @@ constexpr int g_WindowSizeY = 512;
 
 void RenderScene(void)
 {
-	//glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-	glClear(GL_DEPTH_BUFFER_BIT);
+	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	//glClear(GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	//g_Renderer->DrawAlphaClear();
 	 //g_Renderer->DrawVertexSandbox();
 	//g_Renderer->DrawFragmentSandbox();
-	g_Renderer->DrawTextureSandbox();
+	//g_Renderer->DrawTextureSandbox();
 	//g_Renderer->DrawParticleEffect();
+	g_Renderer->DrawGridMesh();
 
 	glutSwapBuffers();
 }

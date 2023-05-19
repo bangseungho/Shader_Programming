@@ -184,6 +184,8 @@
   <ItemGroup>
     <None Include="Shaders\AlphaClear.fs" />
     <None Include="Shaders\AlphaClear.vs" />
+    <None Include="Shaders\GridMesh.fs" />
+    <None Include="Shaders\GridMesh.vs" />
     <None Include="Shaders\Particle.fs" />
     <None Include="Shaders\Particle.vs" />
     <None Include="Shaders\FragmentSandbox.fs" />
