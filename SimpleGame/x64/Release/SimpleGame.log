@@ -1,13 +1,13 @@
 ﻿  Renderer.cpp
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(108,34): warning C4267: '=': 'size_t'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(278,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(328,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(374,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(402,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-C:\GitHub\Shader_Programming\SimpleGame\Renderer.cpp(749,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(108,34): warning C4267: '=': 'size_t'에서 'GLint'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(278,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(328,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(374,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(402,33): warning C4244: '+=': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Github\Shader_Programming\SimpleGame\Renderer.cpp(749,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
   코드를 생성하고 있습니다.
-  4 of 407 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
+  7 of 408 functions ( 1.7%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     2 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
-  SimpleGame.vcxproj -> C:\GitHub\Shader_Programming\x64\Release\SimpleGame.exe
+  SimpleGame.vcxproj -> C:\Github\Shader_Programming\x64\Release\SimpleGame.exe

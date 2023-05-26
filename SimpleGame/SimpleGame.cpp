@@ -32,7 +32,7 @@ void RenderScene(void)
 	//g_Renderer->DrawParticleEffect();
 	g_Renderer->DrawGridMesh();
 
-	glutSwapBuffers();
+	glutSwapBuffers(); // front -> back, back -> front
 }
 
 void Idle(void)

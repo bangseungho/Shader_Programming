@@ -31,7 +31,6 @@ private:
 	int SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size);
 	void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset);
 
-
 	GLuint m_ParticlePositionVBO = -1;
 	GLuint m_ParticleColorVBO = -1;
 	GLuint m_ParticleVelocityVBO = -1;
@@ -48,7 +47,6 @@ private:
 	GLuint m_VertexSandboxShader = -1;
 	GLuint m_HoriLineVBO = -1;
 	GLuint m_HoriLineVertexCount = 0;
-	
 
 public:
 	GLuint m_FragmentSandboxShader = -1;
@@ -90,5 +88,17 @@ private:
 	GLuint m_GridMeshShader = 0;
 	GLuint m_GridMeshVertexCount = 0;
 	GLuint m_GridMeshVBO = 0;
+
+
+private:
+	// FrameBuffer Object
+	GLuint m_AFBOTexture = 0;
+	GLuint m_BFBOTexture = 0;
+	GLuint m_CFBOTexture = 0;
+	GLuint m_DepthRenderBuffer = 0;
+
+	GLuint m_A_FBO = 0;
+
+	void CreateFBOs();
 };
 
