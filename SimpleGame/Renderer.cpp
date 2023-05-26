@@ -18,8 +18,6 @@ uniform_real_distribution urdPeriod{0.f, 1.f};
 uniform_real_distribution urdAmp{-1.f, 1.f};
 uniform_real_distribution urdValue{0.f, 1.f};
 
-#pragma region DOIT
-
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
 	Initialize(windowSizeX, windowSizeY);
@@ -30,6 +28,7 @@ Renderer::~Renderer()
 	delete m_Timer;
 }
 
+// Init
 void Renderer::Initialize(int windowSizeX, int windowSizeY)
 {
 	//Set window size
@@ -50,7 +49,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//CreateTextures(); 
 	CreateGridMesh();
 	//m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
-	m_RGBTexture = CreatePngTexture("./explosion.png", GL_NEAREST);
+	m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
 	CreateFBOs();
 
 	m_Timer = new Timer();
@@ -67,30 +66,21 @@ bool Renderer::IsInitialized()
 	return m_Initialized;
 }
 
-void Renderer::CreateVertexBufferObjects()
+bool Renderer::ReadFile(char* filename, std::string *target)
 {
-	float textureRect[] = {
-		-0.5f, 0.5f, 0.f,	0.f, 0.f,
-		-0.5f, -0.5f, 0.f,	0.f, 1.f,
-		0.5f, 0.5f, 0.f,	1.f, 0.f,
-		0.5f, 0.5f, 0.f,	1.f, 0.f,
-		-0.5f, -0.5f, 0.f,	0.f, 1.f,
-		0.5f, -0.5f, 0.f,	1.f, 1.f
-	};
-	glGenBuffers(1, &m_TextureSandboxVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(textureRect), textureRect, GL_STATIC_DRAW);
-
-	float rect[]
-		=
+	std::ifstream file(filename);
+	if (file.fail())
 	{
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
-	};
-
-	glGenBuffers(1, &m_VBORect);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
+		std::cout << filename << " file loading failed.. \n";
+		file.close();
+		return false;
+	}
+	std::string line;
+	while (getline(file, line)) {
+		target->append(line.c_str());
+		target->append("\n");
+	}
+	return true;
 }
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
@@ -128,21 +118,10 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-bool Renderer::ReadFile(char* filename, std::string *target)
+void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
 {
-	std::ifstream file(filename);
-	if (file.fail())
-	{
-		std::cout << filename << " file loading failed.. \n";
-		file.close();
-		return false;
-	}
-	std::string line;
-	while (getline(file, line)) {
-		target->append(line.c_str());
-		target->append("\n");
-	}
-	return true;
+	*newX = x * 2.f / m_WindowSizeX;
+	*newY = y * 2.f / m_WindowSizeY;
 }
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
@@ -203,30 +182,6 @@ GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 	return ShaderProgram;
 }
 
-void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
-{
-	float newX, newY;
-
-	GetGLPosition(x, y, &newX, &newY);
-
-	//Program select
-	glUseProgram(m_SolidRectShader);
-
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
-	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
-
-	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-
-	glDisableVertexAttribArray(attribPosition);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
 int Renderer::SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint VBO, GLint size)
 {
 	int attribLoc = -1;
@@ -237,176 +192,13 @@ int Renderer::SetAttribVBO(int shaderProgram, const GLchar* attribName, GLuint V
 	return attribLoc;
 }
 
-#pragma endregion
-
 void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset)
 {
 	glEnableVertexAttribArray(attribLoc);
 	glVertexAttribPointer(attribLoc, size, GL_FLOAT, GL_FALSE, sizeof(float) * stride, (GLvoid*)(sizeof(float) * offset));
 }
 
-void Renderer::DrawAlphaClear()
-{
-	GLuint shader = m_AlphaClearShader;
-	glUseProgram(shader);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
-	glBindBuffer(GL_ARRAY_BUFFER, m_AlphaClearVBO);
-	SetAttribute(posLoc, 3, 0, 0);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glDisable(GL_BLEND);
-}
-
-void Renderer::DrawVertexSandbox()
-{
-	m_Timer->Update();
-	GLuint shader = m_VertexSandboxShader;
-	glUseProgram(shader);
-
-	GLuint posAttribLoc = glGetAttribLocation(shader, "a_Position");
-	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
-	SetAttribute(posAttribLoc, 3, 0, 0);
-	
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
-	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
-	glDrawArrays(GL_TRIANGLES, 0, m_HoriLineVertexCount);
-
-	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 0.5f);
-	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
-
-	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
-	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
-
-	glDisable(GL_BLEND);
-}
-
-
-
-void Renderer::DrawParticleEffect()
-{
-	m_Timer->Update();
-
-	int shaderProgram = m_ParticleShader;
-	glUseProgram(shaderProgram);
-
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	//int posAttribLoc = SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
-	//int colorAttribLoc = SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
-	//int velocityAttribLoc = SetAttribVBO(shaderProgram, "a_Vel", m_ParticleVelocityVBO, 3);
-	int emitAttribLoc = SetAttribVBO(shaderProgram, "a_EmitTime", m_ParticleEmitTimeVBO, 1);
-	int lifeAttribLoc = SetAttribVBO(shaderProgram, "a_LifeTime", m_ParticleLifeTimeVBO, 1);
-	int	periodAttribLoc = SetAttribVBO(shaderProgram, "a_Period", m_ParticlePeriodVBO, 1);
-	int ampAttribLoc = SetAttribVBO(shaderProgram, "a_Amp", m_ParticleAmpVBO, 1);
-	int valueAttribLoc = SetAttribVBO(shaderProgram, "a_Value", m_ParticleValueVBO, 1);
-
-	int posAttribLoc = -1;
-	posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
-	int colorAttribLoc = -1;
-	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");	
-	int velocityAttribLoc = -1;
-	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
-	int uvAttribLoc = -1;
-	uvAttribLoc = glGetAttribLocation(shaderProgram, "a_Texcoord");
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelUVVBO);
-	SetAttribute(posAttribLoc, 3, 12, 0);
-	SetAttribute(colorAttribLoc, 4, 12, 3);
-	SetAttribute(velocityAttribLoc, 3, 12, 7);
-	SetAttribute(uvAttribLoc, 2, 12, 10);
-
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
-	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
-	
-	static float period = 1;
-	
-	//static float m = 0.005;
-	//if (period >= 50 || period <= 0)
-	//	m *= -1;
-	//period += m;
-	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Period"), period);
-
-	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
-	glDisable(GL_BLEND); // 다른 함수에서도 사용하기 때문에 꺼야함 나중에
-}
-
-void Renderer::DrawFragmentSandbox()
-{
-	m_Timer->Update();
-
-	GLuint shader = m_FragmentSandboxShader;
-	glUseProgram(shader);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	int posLoc = glGetAttribLocation(shader, "a_Position");
-	int texLoc = glGetAttribLocation(shader, "a_Texcoord");
-	glEnableVertexAttribArray(posLoc);
-	glEnableVertexAttribArray(texLoc);
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
-	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 5, 0);
-	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
-
-	float x = 0.5f;
-	float y = 0.f;
-	glUniform2f(glGetUniformLocation(shader, "u_Point"), x, y);
-
-	float points[] = { 0.5f, 0.5f,
-					   0.f, 0.f,
-					   1.f, 1.f };
-
-	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);
-
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
-	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
-void Renderer::DrawTextureSandbox()
-{
-	m_Timer->Update();
-	GLuint shader = m_TextureSandboxShader;
-	glUseProgram(shader);
-
-	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
-	glEnableVertexAttribArray(posLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
-	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
-	
-	GLuint textureLoc = glGetAttribLocation(shader, "a_TexPos");
-	glEnableVertexAttribArray(textureLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
-	glVertexAttribPointer(textureLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
-
-	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
-	glUniform1i(SamplerULoc, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
-
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
-	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
-	
-	glUniform1f(glGetUniformLocation(shader, "u_SeqNum"), g_Time * 30.f);
-
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-}
-
+// Create
 void Renderer::CreateParticle(int numParticle)
 {
 	m_ParticleSize = 0.005f;
@@ -758,32 +550,30 @@ void Renderer::CreateParticle(int numParticle)
 
 }
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::CreateVertexBufferObjects()
 {
-	*newX = x * 2.f / m_WindowSizeX;
-	*newY = y * 2.f / m_WindowSizeY;
-}
+	float textureRect[] = {
+		-0.5f, 0.5f, 0.f,	0.f, 0.f,
+		-0.5f, -0.5f, 0.f,	0.f, 1.f,
+		0.5f, 0.5f, 0.f,	1.f, 0.f,
+		0.5f, 0.5f, 0.f,	1.f, 0.f,
+		-0.5f, -0.5f, 0.f,	0.f, 1.f,
+		0.5f, -0.5f, 0.f,	1.f, 1.f
+	};
+	glGenBuffers(1, &m_TextureSandboxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(textureRect), textureRect, GL_STATIC_DRAW);
 
-void Renderer::CreateTextures()
-{
-	GLulong checkerboard[] = {
-		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
-		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
-		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
-		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
-		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
-		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
-		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
-		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF
+	float rect[]
+		=
+	{
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, -1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,  1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
 	};
 
-	glGenTextures(1, &m_CheckerBoardTexture);
-	glBindTexture(GL_TEXTURE_2D, m_CheckerBoardTexture);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glGenBuffers(1, &m_VBORect);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
 }
 
 GLuint Renderer::CreatePngTexture(char* filePath, GLuint saplingMethod)
@@ -891,28 +681,6 @@ void Renderer::CreateGridMesh()
 	delete[] point;
 }
 
-void Renderer::DrawGridMesh()
-{
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-	glViewport(0, 0, 512, 512);
-	GLuint shader = m_GridMeshShader;
-
-	glUseProgram(shader);
-
-	int attribPosition = glGetAttribLocation(shader, "a_Position");
-	glEnableVertexAttribArray(attribPosition);
-	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-
-	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
-
-	glDisableVertexAttribArray(attribPosition);
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
-}
-
-
 void Renderer::CreateFBOs()
 {
 	GLuint m_AFBOTexture = 0;
@@ -964,3 +732,230 @@ void Renderer::CreateFBOs()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
+// Draw
+void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
+{
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	//Program select
+	glUseProgram(m_SolidRectShader);
+
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Trans"), newX, newY, 0, size);
+	glUniform4f(glGetUniformLocation(m_SolidRectShader, "u_Color"), r, g, b, a);
+
+	int attribPosition = glGetAttribLocation(m_SolidRectShader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawParticleEffect()
+{
+	m_Timer->Update();
+
+	int shaderProgram = m_ParticleShader;
+	glUseProgram(shaderProgram);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//int posAttribLoc = SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
+	//int colorAttribLoc = SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
+	//int velocityAttribLoc = SetAttribVBO(shaderProgram, "a_Vel", m_ParticleVelocityVBO, 3);
+	int emitAttribLoc = SetAttribVBO(shaderProgram, "a_EmitTime", m_ParticleEmitTimeVBO, 1);
+	int lifeAttribLoc = SetAttribVBO(shaderProgram, "a_LifeTime", m_ParticleLifeTimeVBO, 1);
+	int	periodAttribLoc = SetAttribVBO(shaderProgram, "a_Period", m_ParticlePeriodVBO, 1);
+	int ampAttribLoc = SetAttribVBO(shaderProgram, "a_Amp", m_ParticleAmpVBO, 1);
+	int valueAttribLoc = SetAttribVBO(shaderProgram, "a_Value", m_ParticleValueVBO, 1);
+
+	int posAttribLoc = -1;
+	posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
+	int colorAttribLoc = -1;
+	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");	
+	int velocityAttribLoc = -1;
+	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
+	int uvAttribLoc = -1;
+	uvAttribLoc = glGetAttribLocation(shaderProgram, "a_Texcoord");
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelUVVBO);
+	SetAttribute(posAttribLoc, 3, 12, 0);
+	SetAttribute(colorAttribLoc, 4, 12, 3);
+	SetAttribute(velocityAttribLoc, 3, 12, 7);
+	SetAttribute(uvAttribLoc, 2, 12, 10);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
+	
+	static float period = 1;
+	
+	//static float m = 0.005;
+	//if (period >= 50 || period <= 0)
+	//	m *= -1;
+	//period += m;
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Period"), period);
+
+	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
+	glDisable(GL_BLEND); // 다른 함수에서도 사용하기 때문에 꺼야함 나중에
+}
+
+void Renderer::DrawFragmentSandbox()
+{
+	m_Timer->Update();
+
+	GLuint shader = m_FragmentSandboxShader;
+	glUseProgram(shader);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	int posLoc = glGetAttribLocation(shader, "a_Position");
+	int texLoc = glGetAttribLocation(shader, "a_Texcoord");
+	glEnableVertexAttribArray(posLoc);
+	glEnableVertexAttribArray(texLoc);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 5, 0);
+	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE,
+		sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+
+	float x = 0.5f;
+	float y = 0.f;
+	glUniform2f(glGetUniformLocation(shader, "u_Point"), x, y);
+
+	float points[] = { 0.5f, 0.5f,
+					   0.f, 0.f,
+					   1.f, 1.f };
+
+	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::DrawAlphaClear()
+{
+	GLuint shader = m_AlphaClearShader;
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
+	glBindBuffer(GL_ARRAY_BUFFER, m_AlphaClearVBO);
+	SetAttribute(posLoc, 3, 0, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisable(GL_BLEND);
+}
+
+void Renderer::DrawVertexSandbox()
+{
+	m_Timer->Update();
+	GLuint shader = m_VertexSandboxShader;
+	glUseProgram(shader);
+
+	GLuint posAttribLoc = glGetAttribLocation(shader, "a_Position");
+	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
+	SetAttribute(posAttribLoc, 3, 0, 0);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
+	glDrawArrays(GL_TRIANGLES, 0, m_HoriLineVertexCount);
+
+	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 0.5f);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+
+	//glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time + 1.f);
+	//glDrawArrays(GL_LINE_STRIP, 0, m_HoriLineVertexCount);
+
+	glDisable(GL_BLEND);
+}
+
+void Renderer::DrawTextureSandbox()
+{
+	m_Timer->Update();
+	GLuint shader = m_TextureSandboxShader;
+	glUseProgram(shader);
+
+	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(posLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
+	
+	GLuint textureLoc = glGetAttribLocation(shader, "a_TexPos");
+	glEnableVertexAttribArray(textureLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glVertexAttribPointer(textureLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
+	glUniform1i(SamplerULoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
+	
+	glUniform1f(glGetUniformLocation(shader, "u_SeqNum"), g_Time * 30.f);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::DrawGridMesh()
+{
+	m_Timer->Update();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glViewport(0, 0, 512, 512);
+	GLuint shader = m_GridMeshShader;
+
+	glUseProgram(shader);
+
+	int attribPosition = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(attribPosition);
+	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+	
+	GLuint textureLoc = glGetAttribLocation(shader, "a_TexPos");
+	glEnableVertexAttribArray(textureLoc);
+	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glVertexAttribPointer(textureLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
+	glUniform1i(SamplerULoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+
+	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
+
+	glDisableVertexAttribArray(attribPosition);
+	//glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
+
+	static float g_Time = 0.f;
+	g_Time += m_Timer->GetDeltaTime();
+
+	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
+}
+
+
+
+
+

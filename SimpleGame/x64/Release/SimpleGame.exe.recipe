@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Github\Shader_Programming\x64\Release\SimpleGame.exe</FullPath>
+      <FullPath>C:\GitHub\Shader_Programming\x64\Release\SimpleGame.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
