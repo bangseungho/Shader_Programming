@@ -1,13 +1,5 @@
 #pragma once
-
-#include <string>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include <memory>
 #include "Timer.h"
-#include "Dependencies\glew.h"
 
 class Renderer
 {
@@ -28,9 +20,13 @@ public:
 private:
 	void CreateParticle(int numParticle);
 	void CreateVertexBufferObjects();
-	GLuint CreatePngTexture(char* filePath, GLuint saplingMethod);
 	void CreateGridMesh();
+	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
 	void CreateFBOs();
+
+private:
+	void CreateCheckerboard();
+
 
 public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
@@ -40,7 +36,6 @@ public:
 	void DrawVertexSandbox();
 	void DrawTextureSandbox();
 	void DrawGridMesh();
-
 
 private:
 	Timer* m_Timer;
@@ -83,8 +78,12 @@ private:
 	// TextureSandBox
 	GLuint m_TextureSandboxShader = -1;
 	GLuint m_TextureSandboxVBO = -1;
-	GLuint m_RGBTexture = -1;
-	
+
+	// Textures
+	GLuint m_CheckerBoardTexture = 0;
+	GLuint m_RGBTexture = 0;
+	GLuint m_HaerinTexture = 0;
+
 	// Rect
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
