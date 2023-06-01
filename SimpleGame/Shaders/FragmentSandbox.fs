@@ -2,20 +2,19 @@
 
 out vec4 FragColor;
 
-in vec2 v_TexPos;
+in vec2 v_Texcoord;
 
 uniform vec2 u_Point;
 uniform vec2 u_Points[3];
 uniform float u_Time;
 const float c_PI = 3.141592;
-uniform sampler2D u_TexSampler;
 
 void test()
 {
-	float newValueX = v_TexPos.x * 100.0 * c_PI;
+	float newValueX = v_Texcoord.x * 100.0 * c_PI;
 	float outColorGreyVertical = sin(newValueX);
 
-	float newValueY = v_TexPos.y * 100.0 * c_PI;
+	float newValueY = v_Texcoord.y * 100.0 * c_PI;
 	float outColorGreyHorizon = sin(newValueY);
 	float max = max(outColorGreyVertical, outColorGreyHorizon);
 
@@ -24,9 +23,9 @@ void test()
 
 void circle()
 {
-	vec2 temp = v_TexPos - u_Points[0];
+	vec2 temp = v_Texcoord - u_Points[0];
 	float d = length(temp);	
-	vec2 temp1 = v_TexPos - u_Points[1];
+	vec2 temp1 = v_Texcoord - u_Points[1];
 	float d1 = length(temp1);
 
 	if(d < 0.1 || d1 < 0.1){
@@ -39,14 +38,14 @@ void circle()
 
 void Rader()
 {
-	vec2 temp = v_TexPos - vec2(0.5, 0.5);
+	vec2 temp = v_Texcoord - vec2(0.5, 0.5);
 	float d = length(temp);
 	float value = 0.2 * (pow(sin(d * 2 * c_PI - 5 * u_Time), 20) - 0.5);
 	float temp2 = ceil(value);
 	
 	vec4 result = vec4(0);
 	for(int i = 0; i<3; ++i){
-		vec2 temp = v_TexPos - u_Points[i];
+		vec2 temp = v_Texcoord - u_Points[i];
 		float d = length(temp);
 
 		if(d < 0.03){
@@ -58,18 +57,18 @@ void Rader()
 
 void Flag()
 {
-	float newColor2 = sin(v_TexPos.x * c_PI * 2.0 - 10 * (u_Time + 0.2)) * v_TexPos.x;
-	float sinValue = sin(v_TexPos.x * c_PI * 2.0 * 50);
+	float newColor2 = sin(v_Texcoord.x * c_PI * 2.0 - 10 * (u_Time + 0.2)) * v_Texcoord.x;
+	float sinValue = sin(v_Texcoord.x * c_PI * 2.0 * 50);
 	float width = 0.01;
 
 	float finalColor = 0;
 	for(int i = 0; i<6; ++i){
 		float newTime = u_Time / 10 + i * 0.1;
-		float newColor = sin(v_TexPos.x * c_PI * 2.0 - 10 * newTime) * v_TexPos.x;
-		float width = 0.01 * v_TexPos.x * 10;
-		if( (2.0 * (v_TexPos.y - 0.5)) > newColor && (2.0 * (v_TexPos.y - 0.5)) < newColor + width)
+		float newColor = sin(v_Texcoord.x * c_PI * 2.0 - 10 * newTime) * v_Texcoord.x;
+		float width = 0.01 * v_Texcoord.x * 10;
+		if( (2.0 * (v_Texcoord.y - 0.5)) > newColor && (2.0 * (v_Texcoord.y - 0.5)) < newColor + width)
 		{
-			finalColor += 1 * sinValue * (1 - v_TexPos.x);
+			finalColor += 1 * sinValue * (1 - v_Texcoord.x);
 		}
 	}
 	FragColor = vec4(finalColor);
@@ -81,14 +80,14 @@ void Ttest()
 	for(int i=0; i<10; i++)
 	{
 		float newTime = u_Time * 0.1 + i*0.2;
-		float newColor = v_TexPos.x*0.5*
-				sin(v_TexPos.x*c_PI*2 - 10*newTime);
-		float sinValue = sin(v_TexPos.x*c_PI*2*10 - 500*newTime);
-		float width = 0.01*v_TexPos.x*5+0.001;
-		if(2.0*(v_TexPos.y-0.5) > newColor && 
-		   2.0*(v_TexPos.y-0.5) < newColor + width)
+		float newColor = v_Texcoord.x*0.5*
+				sin(v_Texcoord.x*c_PI*2 - 10*newTime);
+		float sinValue = sin(v_Texcoord.x*c_PI*2*10 - 500*newTime);
+		float width = 0.01*v_Texcoord.x*5+0.001;
+		if(2.0*(v_Texcoord.y-0.5) > newColor && 
+		   2.0*(v_Texcoord.y-0.5) < newColor + width)
 		{
-			finalColor += 1*sinValue*(1.0-v_TexPos.x);
+			finalColor += 1*sinValue*(1.0-v_Texcoord.x);
 		}
 		else
 		{
@@ -97,36 +96,8 @@ void Ttest()
 	FragColor = vec4(finalColor);
 }
 
-void RealFlag()
-{
-	float period = (v_TexPos.x + 1.0) * 1.0;
-	float x = v_TexPos.x * 2.0 * c_PI * period;
-	float y = ((1 - v_TexPos.y) - 0.5) * 2;
-	float sinValue = 0.25 * sin(x - u_Time * 10.0);
-
-	float reverseX = 1 - v_TexPos.x;
-
-	if(sinValue  * v_TexPos.x + 0.75 * (1 - v_TexPos.x * 0.75) > y && sinValue * v_TexPos.x - 0.75 * (1 - v_TexPos.x* 0.75) < y){
-		float vX = v_TexPos.x;
-		float yW = 1.5;
-		float yD = y - (sinValue * v_TexPos.x - 0.75);
-		float vY = 1 - yD / yW;
-
-		FragColor = texture(u_TexSampler, vec2(vX, vY));
-	}
-	else {
-		FragColor = vec4(0.f);
-	}
-
-}
-
-
-void Draw()
-{
-	FragColor = vec4(v_TexPos, 0.f, 1.f);
-}
-
 void main()
 {
-	RealFlag();
+	Flag();
+	Ttest();
 }
