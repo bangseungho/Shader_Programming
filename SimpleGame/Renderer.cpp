@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "Renderer.h"
-#include <random>
-#include <windows.h>
 #include "LoadPng.h"
-#include <assert.h>
 
 using namespace std;
 
@@ -44,21 +41,27 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_TextureSandboxShader = CompileShaders("./Shaders/TextureSandbox.vs", "./Shaders/TextureSandbox.fs");
 	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.fs");
 
-	//Create VBOs
+	// VBOs
 	//CreateVertexBufferObjects();
+	//CreateCheckerboard();
 	//CreateTextures(); 
-	CreateGridMesh();
+	//CreateGridMesh();
+	CreateParticle(10000);
+	
+	// Textures
+	//m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
 	//m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
-	m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
-	CreateFBOs();
+	m_HaerinTexture = CreatePngTexture("./haerin.png", GL_NEAREST);
 
-	m_Timer = new Timer();
-	//CreateParticle(10000);
+	// FBOs
+	//CreateFBOs();
+
 
 	//if (m_SolidRectShader > 0 && m_VBORect > 0)
 	//{
 	//	m_Initialized = true;
 	//}
+	m_Timer = new Timer();
 }
 
 bool Renderer::IsInitialized()
@@ -201,102 +204,13 @@ void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset)
 // Create
 void Renderer::CreateParticle(int numParticle)
 {
-	m_ParticleSize = 0.005f;
+	m_ParticleSize = 0.01f;
 	float centerX = 0.f;
 	float centerY = 0.f;
 	int particleCount = numParticle;
 	m_ParticleVerticesCount = particleCount * 6;
 	int floatCount = particleCount * 6 * 3;
 	int floatCountPosColorVelUV = particleCount * 6 * (3 + 4 + 3 + 2);
-
-#pragma region PosCorVel
-	//// Position
-	//// 총 파티클 버텍스의 x, y, z 값을 설정한다.
-	//std::vector<float> verticesPosition;
-
-	//for (int i = 0; i < particleCount; ++i) {
-	//	centerX = 0.f;
-	//	centerY = 0.f;
-
-	//	// 1
-	//	verticesPosition.push_back(centerX - m_ParticleSize);
-	//	verticesPosition.push_back(centerY + m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-	//	
-	//	// 2
-	//	verticesPosition.push_back(centerX -m_ParticleSize);
-	//	verticesPosition.push_back(centerY -m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-
-	//	// 3
-	//	verticesPosition.push_back(centerX + m_ParticleSize);
-	//	verticesPosition.push_back(centerY + m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-
-	//	// 4
-	//	verticesPosition.push_back(centerX + m_ParticleSize);
-	//	verticesPosition.push_back(centerY + m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-
-	//	// 5
-	//	verticesPosition.push_back(centerX -m_ParticleSize);
-	//	verticesPosition.push_back(centerY -m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-
-	//	// 6
-	//	verticesPosition.push_back(centerX + m_ParticleSize);
-	//	verticesPosition.push_back(centerY - m_ParticleSize);
-	//	verticesPosition.push_back(0.f);
-	//}
-
-	//glGenBuffers(1, &m_ParticlePositionVBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePositionVBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesPosition[0], GL_STATIC_DRAW);
-
-	//// Color
-	//// RGB 세 개의 값이 버텍스 하나에 들어가야 하기 때문에
-	//// attribPointer에서 size는 3임
-	//std::vector<float> verticesColor;
-
-	//for (int i = 0; i < particleCount; ++i) {
-	//	float colorR = urdColor(dre);
-	//	float colorG = urdColor(dre);
-	//	float colorB = urdColor(dre);
-
-	//	verticesColor.push_back(colorR);
-	//	verticesColor.push_back(colorG);
-	//	verticesColor.push_back(colorB);
-
-	//	for (int i = 0; i < 6; ++i) {
-	//		verticesColor.push_back(colorR);
-	//		verticesColor.push_back(colorG);
-	//		verticesColor.push_back(colorB);
-	//	}
-	//}
-
-	//glGenBuffers(1, &m_ParticleColorVBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticleColorVBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesColor[0], GL_STATIC_DRAW);
-
-	//// Velocity
-	//std::vector<float> verticesVelocity;
-
-	//for (int i = 0; i < particleCount; ++i) {
-
-	//	float velocityX = urdVelX(dre);
-	//	float velocityY = urdVelY(dre);
-
-	//	for (int i = 0; i < 6; ++i) {
-	//		verticesVelocity.push_back(velocityX);
-	//		verticesVelocity.push_back(velocityY);
-	//		verticesVelocity.push_back(0.f);
-	//	}
-	//}
-
-	//glGenBuffers(1, &m_ParticleVelocityVBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_ParticleVelocityVBO);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCount, &verticesVelocity[0], GL_STATIC_DRAW);
-#pragma endregion
 
 #pragma region Time
 	// EmitTime
@@ -410,18 +324,23 @@ void Renderer::CreateParticle(int numParticle)
 		float velocityY = urdVelY(dre);
 
 		// 1
+		// position
 		verticesPosColorVelUV.push_back(centerX - m_ParticleSize);
 		verticesPosColorVelUV.push_back(centerY + m_ParticleSize);
 		verticesPosColorVelUV.push_back(0.f);
+		// color
 		verticesPosColorVelUV.push_back(colorR);
 		verticesPosColorVelUV.push_back(colorG);
 		verticesPosColorVelUV.push_back(colorB);
 		verticesPosColorVelUV.push_back(colorA);
+		// velocity
 		verticesPosColorVelUV.push_back(velocityX);
 		verticesPosColorVelUV.push_back(velocityY);
 		verticesPosColorVelUV.push_back(0.f);
+		// uv
 		verticesPosColorVelUV.push_back(0.f);
 		verticesPosColorVelUV.push_back(0.f);
+
 		// 2
 		verticesPosColorVelUV.push_back(centerX - m_ParticleSize);
 		verticesPosColorVelUV.push_back(centerY - m_ParticleSize);
@@ -435,6 +354,7 @@ void Renderer::CreateParticle(int numParticle)
 		verticesPosColorVelUV.push_back(0.f);
 		verticesPosColorVelUV.push_back(0.f);
 		verticesPosColorVelUV.push_back(1.f);
+
 		// 3
 		verticesPosColorVelUV.push_back(centerX + m_ParticleSize);
 		verticesPosColorVelUV.push_back(centerY + m_ParticleSize);
@@ -494,25 +414,16 @@ void Renderer::CreateParticle(int numParticle)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * floatCountPosColorVelUV, &verticesPosColorVelUV[0], GL_STATIC_DRAW);
 
 #pragma region Sandbox
-	float size = 0.05f;
+	float size = 1.f;
 	float rect1[] =
 	{
-		-size, -size, 0.f,
-		-size, size, 0.f,
-		size, size, 0.f,
-		-size, -size, 0.f,
-		size, size, 0.f,
-		size, -size, 0.f,
+		-size, -size, 0.f,	0.f, 1.f,
+		-size, size, 0.f,	0.f, 0.f,
+		size, size, 0.f,	1.f, 0.f,
+		-size, -size, 0.f,	0.f, 1.f,
+		size, size, 0.f,	1.f, 0.f,
+		size, -size, 0.f,	1.f, 1.f
 	};
-	//float rect1[] =
-	//{
-	//	-1.f, -1.f, 0.f,	0.f, 1.f,
-	//	-1.f, 1.f, 0.f,		0.f, 0.f,
-	//	1.f, 1.f, 0.f,		1.f, 0.f,
-	//	-1.f, -1.f, 0.f,	0.f, 1.f,
-	//	1.f, 1.f, 0.f,		1.f, 0.f,
-	//	1.f, -1.f, 0.f,		1.f, 1.f
-	//};
 
 	glGenBuffers(1, &m_FragmentSandboxVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
@@ -574,28 +485,6 @@ void Renderer::CreateVertexBufferObjects()
 	glGenBuffers(1, &m_VBORect);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect), rect, GL_STATIC_DRAW);
-}
-
-GLuint Renderer::CreatePngTexture(char* filePath, GLuint saplingMethod)
-{
-	vector<unsigned char> image;
-	unsigned width, height;
-	unsigned error = lodepng::decode(image, width, height, filePath);
-
-	if (error != 0)
-	{
-		cout << "PNG image loading failed: " << filePath << endl;
-		assert(0);
-	}
-
-	GLuint temp;
-	glGenTextures(1, &temp);
-	glBindTexture(GL_TEXTURE_2D, temp);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, saplingMethod);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, saplingMethod);
-
-	return temp;
 }
 
 void Renderer::CreateGridMesh()
@@ -681,6 +570,28 @@ void Renderer::CreateGridMesh()
 	delete[] point;
 }
 
+GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
+{
+	vector<unsigned char> image;
+	unsigned width, height;
+	unsigned error = lodepng::decode(image, width, height, filePath);
+
+	if (error != 0)
+	{
+		cout << "PNG image loading failed: " << filePath << endl;
+		assert(0);
+	}
+
+	GLuint temp;
+	glGenTextures(1, &temp);
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMethod);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMethod);
+
+	return temp;
+}
+
 void Renderer::CreateFBOs()
 {
 	GLuint m_AFBOTexture = 0;
@@ -731,6 +642,29 @@ void Renderer::CreateFBOs()
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::CreateCheckerboard()
+{
+	static const GLulong checkerboard[] = {
+		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+		0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000,
+		0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF,
+	};
+
+	glGenTextures(1, &m_CheckerBoardTexture);
+	glBindTexture(GL_TEXTURE_2D, m_CheckerBoardTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, checkerboard);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 // Draw
@@ -792,16 +726,17 @@ void Renderer::DrawParticleEffect()
 	SetAttribute(velocityAttribLoc, 3, 12, 7);
 	SetAttribute(uvAttribLoc, 2, 12, 10);
 
+	GLuint SamplerULoc = glGetUniformLocation(shaderProgram, "u_TexSampler");
+	glUniform1i(SamplerULoc, 0); // 0번째 슬롯에 넘기겠다는 의미
+	glActiveTexture(GL_TEXTURE0); // 0번째 슬롯에 넘기며 바인드
+	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture); // 0번째 슬롯에 바인드가 됨
+
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 	
 	static float period = 1;
 	
-	//static float m = 0.005;
-	//if (period >= 50 || period <= 0)
-	//	m *= -1;
-	//period += m;
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Period"), period);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
@@ -823,13 +758,11 @@ void Renderer::DrawFragmentSandbox()
 	glEnableVertexAttribArray(texLoc);
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
-	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 5, 0);
-	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE,
-		sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
 
 	float x = 0.5f;
-	float y = 0.f;
+	float y = 0.5f;
 	glUniform2f(glGetUniformLocation(shader, "u_Point"), x, y);
 
 	float points[] = { 0.5f, 0.5f,
@@ -894,26 +827,28 @@ void Renderer::DrawTextureSandbox()
 	GLuint shader = m_TextureSandboxShader;
 	glUseProgram(shader);
 
+
 	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(posLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
-	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
-	
 	GLuint textureLoc = glGetAttribLocation(shader, "a_TexPos");
 	glEnableVertexAttribArray(textureLoc);
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 0));
 	glVertexAttribPointer(textureLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
-	glUniform1i(SamplerULoc, 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_RGBTexture);
+	glUniform1i(SamplerULoc, 0); // 0번째 슬롯에 넘기겠다는 의미
+	glActiveTexture(GL_TEXTURE0); // 0번째 슬롯에 넘기며 바인드
+	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture); // 0번째 슬롯에 바인드가 됨
 
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
 	
 	glUniform1f(glGetUniformLocation(shader, "u_SeqNum"), g_Time * 30.f);
+
+	glUniform2f(glGetUniformLocation(shader, "xy_repeat"), floor(g_Time), floor(g_Time));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
