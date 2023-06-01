@@ -27,7 +27,6 @@ private:
 private:
 	void CreateCheckerboard();
 
-
 public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawParticleEffect();
@@ -36,6 +35,7 @@ public:
 	void DrawVertexSandbox();
 	void DrawTextureSandbox();
 	void DrawGridMesh();
+	void DrawTexture(float x, float y, float scaleX, float scaleY, GLuint texID);
 
 private:
 	Timer* m_Timer;
@@ -96,9 +96,18 @@ private:
 
 	// FrameBuffer Object
 	GLuint m_AFBOTexture = 0;
+	GLuint m_AFBOAttach_1_Texture = 0;
+	GLuint m_AFBOAttach_2_Texture = 0;
+	GLuint m_AFBOAttach_3_Texture = 0;
+	GLuint m_AFBOAttach_4_Texture = 0;
+
 	GLuint m_BFBOTexture = 0;
 	GLuint m_CFBOTexture = 0;
 	GLuint m_DepthRenderBuffer = 0;
 	GLuint m_A_FBO = 0;
+
+	// DrawTesture
+	GLuint m_DrawTextureVBO = 0;
+	GLuint m_DrawTextureShader = 0;
 };
 

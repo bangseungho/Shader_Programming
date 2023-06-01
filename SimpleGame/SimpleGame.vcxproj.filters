@@ -51,40 +51,46 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\FragmentSandbox.fs">
+    <None Include="Shaders\FragmentSandbox.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\FragmentSandbox.vs">
+    <None Include="Shaders\FragmentSandbox.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\Particle.vs">
+    <None Include="Shaders\Particle.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\Particle.fs">
+    <None Include="Shaders\Particle.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\AlphaClear.fs">
+    <None Include="Shaders\AlphaClear.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\AlphaClear.vs">
+    <None Include="Shaders\AlphaClear.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\VertexSandbox.fs">
+    <None Include="Shaders\VertexSandbox.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\VertexSandbox.vs">
+    <None Include="Shaders\VertexSandbox.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\TextureSandbox.fs">
+    <None Include="Shaders\TextureSandbox.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\TextureSandbox.vs">
+    <None Include="Shaders\TextureSandbox.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\GridMesh.fs">
+    <None Include="Shaders\GridMesh.frag">
       <Filter>소스 파일\Shaders</Filter>
     </None>
-    <None Include="Shaders\GridMesh.vs">
+    <None Include="Shaders\GridMesh.vert">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\DrawTexture.frag">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\DrawTexture.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
   </ItemGroup>

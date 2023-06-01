@@ -182,18 +182,20 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\AlphaClear.fs" />
-    <None Include="Shaders\AlphaClear.vs" />
-    <None Include="Shaders\GridMesh.fs" />
-    <None Include="Shaders\GridMesh.vs" />
-    <None Include="Shaders\Particle.fs" />
-    <None Include="Shaders\Particle.vs" />
-    <None Include="Shaders\FragmentSandbox.fs" />
-    <None Include="Shaders\FragmentSandbox.vs" />
-    <None Include="Shaders\TextureSandbox.fs" />
-    <None Include="Shaders\TextureSandbox.vs" />
-    <None Include="Shaders\VertexSandbox.fs" />
-    <None Include="Shaders\VertexSandbox.vs" />
+    <None Include="Shaders\AlphaClear.frag" />
+    <None Include="Shaders\AlphaClear.vert" />
+    <None Include="Shaders\DrawTexture.frag" />
+    <None Include="Shaders\DrawTexture.vert" />
+    <None Include="Shaders\GridMesh.frag" />
+    <None Include="Shaders\GridMesh.vert" />
+    <None Include="Shaders\Particle.frag" />
+    <None Include="Shaders\Particle.vert" />
+    <None Include="Shaders\FragmentSandbox.frag" />
+    <None Include="Shaders\FragmentSandbox.vert" />
+    <None Include="Shaders\TextureSandbox.frag" />
+    <None Include="Shaders\TextureSandbox.vert" />
+    <None Include="Shaders\VertexSandbox.frag" />
+    <None Include="Shaders\VertexSandbox.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,15 +5,15 @@
 using namespace std;
 
 default_random_engine dre;
-uniform_real_distribution urdColor{0.f, 1.0f};
-uniform_real_distribution urdPos{-1.f, 1.f};
-uniform_real_distribution urdVelX{-1.f, 1.f};
-uniform_real_distribution urdVelY{0.f, 2.f};
-uniform_real_distribution urdEmitTime{0.f, 10.f};
-uniform_real_distribution urdLifeTime{0.f, 3.f};
-uniform_real_distribution urdPeriod{0.f, 1.f};
-uniform_real_distribution urdAmp{-1.f, 1.f};
-uniform_real_distribution urdValue{0.f, 1.f};
+uniform_real_distribution urdColor{ 0.f, 1.0f };
+uniform_real_distribution urdPos{ -1.f, 1.f };
+uniform_real_distribution urdVelX{ -1.f, 1.f };
+uniform_real_distribution urdVelY{ 0.f, 2.f };
+uniform_real_distribution urdEmitTime{ 0.f, 10.f };
+uniform_real_distribution urdLifeTime{ 0.f, 3.f };
+uniform_real_distribution urdPeriod{ 0.f, 1.f };
+uniform_real_distribution urdAmp{ -1.f, 1.f };
+uniform_real_distribution urdValue{ 0.f, 1.f };
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -34,28 +34,27 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	//Load shaders
 	//m_SolidRectShader = CompileShaders("./Shaders/SolidRect.vs", "./Shaders/SolidRect.fs");
-	m_ParticleShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
-	m_FragmentSandboxShader = CompileShaders("./Shaders/FragmentSandbox.vs", "./Shaders/FragmentSandbox.fs");
-	m_AlphaClearShader = CompileShaders("./Shaders/AlphaClear.vs", "./Shaders/AlphaClear.fs");
-	m_VertexSandboxShader = CompileShaders("./Shaders/VertexSandbox.vs", "./Shaders/VertexSandbox.fs");
-	m_TextureSandboxShader = CompileShaders("./Shaders/TextureSandbox.vs", "./Shaders/TextureSandbox.fs");
-	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vs", "./Shaders/GridMesh.fs");
+	m_ParticleShader = CompileShaders("./Shaders/Particle.vert", "./Shaders/Particle.frag");
+	m_FragmentSandboxShader = CompileShaders("./Shaders/FragmentSandbox.vert", "./Shaders/FragmentSandbox.frag");
+	m_AlphaClearShader = CompileShaders("./Shaders/AlphaClear.vert", "./Shaders/AlphaClear.frag");
+	m_VertexSandboxShader = CompileShaders("./Shaders/VertexSandbox.vert", "./Shaders/VertexSandbox.frag");
+	m_TextureSandboxShader = CompileShaders("./Shaders/TextureSandbox.vert", "./Shaders/TextureSandbox.frag");
+	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vert", "./Shaders/GridMesh.frag");
+	m_DrawTextureShader = CompileShaders("./Shaders/DrawTexture.vert", "./Shaders/DrawTexture.frag");
 
 	// VBOs
-	//CreateVertexBufferObjects();
+	CreateVertexBufferObjects();
 	//CreateCheckerboard();
-	//CreateTextures(); 
-	//CreateGridMesh();
-	CreateParticle(10000);
-	
+	CreateGridMesh();
+	CreateParticle(1000);
+
 	// Textures
 	//m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
 	//m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
 	m_HaerinTexture = CreatePngTexture("./haerin.png", GL_NEAREST);
 
 	// FBOs
-	//CreateFBOs();
-
+	CreateFBOs();
 
 	//if (m_SolidRectShader > 0 && m_VBORect > 0)
 	//{
@@ -69,7 +68,7 @@ bool Renderer::IsInitialized()
 	return m_Initialized;
 }
 
-bool Renderer::ReadFile(char* filename, std::string *target)
+bool Renderer::ReadFile(char* filename, std::string* target)
 {
 	std::ifstream file(filename);
 	if (file.fail())
@@ -121,7 +120,7 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::GetGLPosition(float x, float y, float* newX, float* newY)
 {
 	*newX = x * 2.f / m_WindowSizeX;
 	*newY = y * 2.f / m_WindowSizeY;
@@ -242,7 +241,7 @@ void Renderer::CreateParticle(int numParticle)
 		verticesLifeTime.push_back(lifeTime);
 		verticesLifeTime.push_back(lifeTime);
 		verticesLifeTime.push_back(lifeTime);
-		
+
 		verticesLifeTime.push_back(lifeTime);
 		verticesLifeTime.push_back(lifeTime);
 		verticesLifeTime.push_back(lifeTime);
@@ -430,14 +429,32 @@ void Renderer::CreateParticle(int numParticle)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(rect1), rect1, GL_STATIC_DRAW);
 #pragma endregion
 
+	float sizeX = 1.f / m_WindowSizeX;
+	float sizeY = 1.f / m_WindowSizeY;
+
+	float DrawTextureRect[] =
+	{
+		-sizeX, -sizeY, 0.f,	0.f, 1.f,
+		-sizeX, sizeY, 0.f,		0.f, 0.f,
+		sizeX, sizeY, 0.f,		1.f, 0.f,
+		-sizeX, -sizeY, 0.f,	0.f, 1.f,
+		sizeX, sizeY, 0.f,		1.f, 0.f,
+		sizeX, -sizeY, 0.f,		1.f, 1.f
+	};
+
+	glGenBuffers(1, &m_DrawTextureVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_DrawTextureVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(DrawTextureRect), DrawTextureRect, GL_STATIC_DRAW);
+
+
 	float rect2[] =
 	{
 		-1.f, -1.f, 0.f,
-		-1.f, 1.f, 0.f,	
-		1.f, 1.f, 0.f,	
+		-1.f, 1.f, 0.f,
+		1.f, 1.f, 0.f,
 		-1.f, -1.f, 0.f,
-		1.f, 1.f, 0.f,	
-		1.f, -1.f, 0.f,	
+		1.f, 1.f, 0.f,
+		1.f, -1.f, 0.f,
 	};
 
 	glGenBuffers(1, &m_AlphaClearVBO);
@@ -450,7 +467,7 @@ void Renderer::CreateParticle(int numParticle)
 	float gap = 2.f / ((float)m_HoriLineVertexCount - 1.f);
 	vector<float> lineVertice;
 	for (int i = 0; i < m_HoriLineVertexCount; ++i) {
-		lineVertice.push_back(-1.f + (float)i* gap);
+		lineVertice.push_back(-1.f + (float)i * gap);
 		lineVertice.push_back(0.f);
 		lineVertice.push_back(0.f);
 	}
@@ -594,45 +611,81 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 
 void Renderer::CreateFBOs()
 {
-	GLuint m_AFBOTexture = 0;
-	GLuint m_BFBOTexture = 0;
-	GLuint m_CFBOTexture = 0;
-	
 	glGenTextures(1, &m_AFBOTexture);
 	glBindTexture(GL_TEXTURE_2D, m_AFBOTexture);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_AFBOAttach_1_Texture);
+	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_1_Texture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_AFBOAttach_2_Texture);
+	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_2_Texture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_AFBOAttach_3_Texture);
+	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_3_Texture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+
+	glGenTextures(1, &m_AFBOAttach_4_Texture);
+	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_4_Texture);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glGenTextures(1, &m_BFBOTexture);
 	glBindTexture(GL_TEXTURE_2D, m_BFBOTexture);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glGenTextures(1, &m_CFBOTexture);
 	glBindTexture(GL_TEXTURE_2D, m_CFBOTexture);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 512, 512, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glGenRenderbuffers(1, &m_DepthRenderBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, m_DepthRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 512, 512);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 1024);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	glGenFramebuffers(1, &m_A_FBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_AFBOTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_AFBOAttach_1_Texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_AFBOAttach_2_Texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_AFBOAttach_3_Texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_AFBOAttach_4_Texture, 0);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthRenderBuffer);
 
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -714,7 +767,7 @@ void Renderer::DrawParticleEffect()
 	int posAttribLoc = -1;
 	posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
 	int colorAttribLoc = -1;
-	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");	
+	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");
 	int velocityAttribLoc = -1;
 	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
 	int uvAttribLoc = -1;
@@ -734,9 +787,9 @@ void Renderer::DrawParticleEffect()
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
-	
+
 	static float period = 1;
-	
+
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Period"), period);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
@@ -746,6 +799,12 @@ void Renderer::DrawParticleEffect()
 void Renderer::DrawFragmentSandbox()
 {
 	m_Timer->Update();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
+	glViewport(0, 0, 1024, 1024);
+	GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	glDrawBuffers(5, drawBuffers);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLuint shader = m_FragmentSandboxShader;
 	glUseProgram(shader);
@@ -759,23 +818,36 @@ void Renderer::DrawFragmentSandbox()
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
 	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
+	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
+	glUniform1i(SamplerULoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture);
+
+#pragma region Rader
 	float x = 0.5f;
 	float y = 0.5f;
 	glUniform2f(glGetUniformLocation(shader, "u_Point"), x, y);
 
 	float points[] = { 0.5f, 0.5f,
-					   0.f, 0.f,
-					   1.f, 1.f };
+					   0.3f, 0.3f,
+					   0.8f, 0.8f };
 
-	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);
-
+	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);  
+#pragma endregion 
+	 
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	DrawTexture(-0.5, -0.5, 512, 512, m_AFBOAttach_1_Texture);
+	DrawTexture(0.5, -0.5, 512, 512, m_AFBOAttach_2_Texture);
+	DrawTexture(-0.5, 0.5, 512, 512, m_AFBOAttach_3_Texture);
+	DrawTexture(0.5, 0.5, 512, 512, m_AFBOAttach_4_Texture);
 }
 
 void Renderer::DrawAlphaClear()
@@ -803,7 +875,7 @@ void Renderer::DrawVertexSandbox()
 	GLuint posAttribLoc = glGetAttribLocation(shader, "a_Position");
 	glBindBuffer(GL_ARRAY_BUFFER, m_FragmentSandboxVBO);
 	SetAttribute(posAttribLoc, 3, 0, 0);
-	
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -845,7 +917,7 @@ void Renderer::DrawTextureSandbox()
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
-	
+
 	glUniform1f(glGetUniformLocation(shader, "u_SeqNum"), g_Time * 30.f);
 
 	glUniform2f(glGetUniformLocation(shader, "xy_repeat"), floor(g_Time), floor(g_Time));
@@ -868,10 +940,10 @@ void Renderer::DrawGridMesh()
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
-	
+
 	GLuint textureLoc = glGetAttribLocation(shader, "a_TexPos");
 	glEnableVertexAttribArray(textureLoc);
-	glBindBuffer(GL_ARRAY_BUFFER, m_TextureSandboxVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_GridMeshVBO);
 	glVertexAttribPointer(textureLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
@@ -882,7 +954,6 @@ void Renderer::DrawGridMesh()
 	glDrawArrays(GL_LINE_STRIP, 0, m_GridMeshVertexCount);
 
 	glDisableVertexAttribArray(attribPosition);
-	//glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
 
 	static float g_Time = 0.f;
 	g_Time += m_Timer->GetDeltaTime();
@@ -890,7 +961,28 @@ void Renderer::DrawGridMesh()
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
 }
 
+void Renderer::DrawTexture(float x, float y, float scaleX, float scaleY, GLuint texID)
+{
+	static float g_Time = 0.f;
 
+	GLuint shader = m_DrawTextureShader;
+	glUseProgram(shader);
 
+	int posLoc = glGetAttribLocation(shader, "a_Position");
+	glEnableVertexAttribArray(posLoc);
+	int texLoc = glGetAttribLocation(shader, "a_TexPos");
+	glEnableVertexAttribArray(texLoc);
 
+	glBindBuffer(GL_ARRAY_BUFFER, m_DrawTextureVBO);
+	glVertexAttribPointer(posLoc, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
+	GLuint samplerULoc = glGetUniformLocation(shader, "u_TexSampler");
+	glUniform1i(samplerULoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glUniform4f(glGetUniformLocation(shader, "u_PosScale"), x, y, scaleX, scaleY);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+}

@@ -27,11 +27,10 @@ void RenderScene(void)
 
 	//g_Renderer->DrawAlphaClear();
 	//g_Renderer->DrawVertexSandbox();
-	//g_Renderer->DrawFragmentSandbox();
-	g_Renderer->DrawParticleEffect();
+	g_Renderer->DrawFragmentSandbox();
+	//g_Renderer->DrawParticleEffect();
 	//g_Renderer->DrawGridMesh();
 	//g_Renderer->DrawTextureSandbox();
-
 	glutSwapBuffers(); // front -> back, back -> front
 }
 
