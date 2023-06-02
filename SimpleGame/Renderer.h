@@ -9,6 +9,7 @@ public:
 
 public:
 	void Initialize(int windowSizeX, int windowSizeY);
+	void Update();
 	bool IsInitialized();
 	bool ReadFile(char* filename, std::string* target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
@@ -22,6 +23,9 @@ private:
 	void CreateVertexBufferObjects();
 	void CreateGridMesh();
 	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
+	void CreateDepthRenderBuffer(GLuint& depthRenderBuffer, GLsizei width, GLsizei height);
+	void CreateOffscreenTexture(GLuint& texID, GLsizei width, GLsizei height);
+	void CreateFBO(GLuint& offScreenTexture, GLuint& depthRenderBuffer, GLuint& texID, GLenum attach);
 	void CreateFBOs();
 
 private:
@@ -36,9 +40,11 @@ public:
 	void DrawTextureSandbox();
 	void DrawGridMesh();
 	void DrawTexture(float x, float y, float scaleX, float scaleY, GLuint texID);
+	void DrawFBOTexture();
 
 private:
 	Timer* m_Timer;
+	float g_Time = 0.f;
 
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
@@ -96,18 +102,20 @@ private:
 
 	// FrameBuffer Object
 	GLuint m_AFBOTexture = 0;
-	GLuint m_AFBOAttach_1_Texture = 0;
-	GLuint m_AFBOAttach_2_Texture = 0;
-	GLuint m_AFBOAttach_3_Texture = 0;
-	GLuint m_AFBOAttach_4_Texture = 0;
-
 	GLuint m_BFBOTexture = 0;
+	GLuint m_B_1_FBOTexture = 0;
+	GLuint m_B_2_FBOTexture = 0;
+	GLuint m_B_3_FBOTexture = 0;
 	GLuint m_CFBOTexture = 0;
-	GLuint m_DepthRenderBuffer = 0;
+
 	GLuint m_A_FBO = 0;
+	GLuint m_B_FBO = 0;
+	GLuint m_C_FBO = 0;
+	GLuint m_DepthRenderBuffer = 0;
 
 	// DrawTesture
 	GLuint m_DrawTextureVBO = 0;
 	GLuint m_DrawTextureShader = 0;
+
 };
 

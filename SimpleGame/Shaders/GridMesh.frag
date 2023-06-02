@@ -8,7 +8,7 @@ in float v_greyScale;
 
 void GridMesh()
 {
-	vec2 newTexPos = fract(v_TexPos * 5.0);
+	vec2 newTexPos = fract(v_TexPos * 1.0);
 	FragColor = 0.8 * (v_greyScale + 1.0) * texture(u_TexSampler, newTexPos);
 }
 

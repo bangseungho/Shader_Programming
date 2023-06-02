@@ -1,6 +1,7 @@
 #version 330
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+
 varying vec4 v_Color;
 in vec2 v_Texcoord;
 uniform float u_Period;

@@ -46,10 +46,10 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	CreateVertexBufferObjects();
 	//CreateCheckerboard();
 	CreateGridMesh();
-	CreateParticle(1000);
+	CreateParticle(10000);
 
 	// Textures
-	//m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
+	m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
 	//m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
 	m_HaerinTexture = CreatePngTexture("./haerin.png", GL_NEAREST);
 
@@ -61,6 +61,12 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//	m_Initialized = true;
 	//}
 	m_Timer = new Timer();
+}
+
+void Renderer::Update()
+{
+	m_Timer->Update();
+	g_Time += m_Timer->GetDeltaTime();
 }
 
 bool Renderer::IsInitialized()
@@ -609,90 +615,60 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 	return temp;
 }
 
-void Renderer::CreateFBOs()
+
+void Renderer::CreateOffscreenTexture(GLuint& texID, GLsizei width, GLsizei height)
 {
-	glGenTextures(1, &m_AFBOTexture);
-	glBindTexture(GL_TEXTURE_2D, m_AFBOTexture);
+	glGenTextures(1, &texID);
+	glBindTexture(GL_TEXTURE_2D, texID);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+}
 
-	glGenTextures(1, &m_AFBOAttach_1_Texture);
-	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_1_Texture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenTextures(1, &m_AFBOAttach_2_Texture);
-	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_2_Texture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenTextures(1, &m_AFBOAttach_3_Texture);
-	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_3_Texture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenTextures(1, &m_AFBOAttach_4_Texture);
-	glBindTexture(GL_TEXTURE_2D, m_AFBOAttach_4_Texture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenTextures(1, &m_BFBOTexture);
-	glBindTexture(GL_TEXTURE_2D, m_BFBOTexture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenTextures(1, &m_CFBOTexture);
-	glBindTexture(GL_TEXTURE_2D, m_CFBOTexture);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1024, 1024, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-	glGenRenderbuffers(1, &m_DepthRenderBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_DepthRenderBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 1024);
+void Renderer::CreateDepthRenderBuffer(GLuint& depthRenderBuffer, GLsizei width, GLsizei height)
+{
+	glGenRenderbuffers(1, &depthRenderBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+}
 
-	glGenFramebuffers(1, &m_A_FBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_AFBOTexture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_AFBOAttach_1_Texture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, m_AFBOAttach_2_Texture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, m_AFBOAttach_3_Texture, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, m_AFBOAttach_4_Texture, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_DepthRenderBuffer);
-
+void Renderer::CreateFBO(GLuint& FBO, GLuint& depthRenderBuffer, GLuint& texID, GLenum attach)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_2D, texID, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
 	if (status != GL_FRAMEBUFFER_COMPLETE) {
 		cout << "fbo creation failed" << endl;
 	}
+}
+
+void Renderer::CreateFBOs()
+{
+	CreateOffscreenTexture(m_AFBOTexture, 512, 512);
+	CreateOffscreenTexture(m_BFBOTexture, 512, 512);
+	CreateOffscreenTexture(m_B_1_FBOTexture, 512, 512);
+	CreateOffscreenTexture(m_B_2_FBOTexture, 512, 512);
+	CreateOffscreenTexture(m_B_3_FBOTexture, 512, 512);
+	CreateOffscreenTexture(m_CFBOTexture, 512, 512);
+
+	CreateDepthRenderBuffer(m_DepthRenderBuffer, 512, 512);
+
+	glGenFramebuffers(1, &m_A_FBO);
+	CreateFBO(m_A_FBO, m_DepthRenderBuffer, m_AFBOTexture, GL_COLOR_ATTACHMENT0);
+	
+	glGenFramebuffers(1, &m_B_FBO);
+	CreateFBO(m_B_FBO, m_DepthRenderBuffer, m_BFBOTexture, GL_COLOR_ATTACHMENT0);
+	CreateFBO(m_B_FBO, m_DepthRenderBuffer, m_B_1_FBOTexture, GL_COLOR_ATTACHMENT1);
+	CreateFBO(m_B_FBO, m_DepthRenderBuffer, m_B_2_FBOTexture, GL_COLOR_ATTACHMENT2);
+	CreateFBO(m_B_FBO, m_DepthRenderBuffer, m_B_3_FBOTexture, GL_COLOR_ATTACHMENT3);
+	
+	glGenFramebuffers(1, &m_C_FBO);
+	CreateFBO(m_C_FBO, m_DepthRenderBuffer, m_CFBOTexture, GL_COLOR_ATTACHMENT0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -747,7 +723,9 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawParticleEffect()
 {
-	m_Timer->Update();
+	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
+	glViewport(0, 0, 512, 512);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	int shaderProgram = m_ParticleShader;
 	glUseProgram(shaderProgram);
@@ -784,8 +762,6 @@ void Renderer::DrawParticleEffect()
 	glActiveTexture(GL_TEXTURE0); // 0번째 슬롯에 넘기며 바인드
 	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture); // 0번째 슬롯에 바인드가 됨
 
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 
 	static float period = 1;
@@ -794,16 +770,18 @@ void Renderer::DrawParticleEffect()
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVerticesCount);
 	glDisable(GL_BLEND); // 다른 함수에서도 사용하기 때문에 꺼야함 나중에
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::DrawFragmentSandbox()
 {
-	m_Timer->Update();
+	glBindFramebuffer(GL_FRAMEBUFFER, m_B_FBO);
+	glViewport(0, 0, 512, 512);
 
-	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
-	glViewport(0, 0, 1024, 1024);
-	GLenum drawBuffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
+	GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4};
 	glDrawBuffers(5, drawBuffers);
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLuint shader = m_FragmentSandboxShader;
@@ -837,17 +815,11 @@ void Renderer::DrawFragmentSandbox()
 	glUniform2fv(glGetUniformLocation(shader, "u_Points"), 3, points);  
 #pragma endregion 
 	 
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	DrawTexture(-0.5, -0.5, 512, 512, m_AFBOAttach_1_Texture);
-	DrawTexture(0.5, -0.5, 512, 512, m_AFBOAttach_2_Texture);
-	DrawTexture(-0.5, 0.5, 512, 512, m_AFBOAttach_3_Texture);
-	DrawTexture(0.5, 0.5, 512, 512, m_AFBOAttach_4_Texture);
 }
 
 void Renderer::DrawAlphaClear()
@@ -868,7 +840,6 @@ void Renderer::DrawAlphaClear()
 
 void Renderer::DrawVertexSandbox()
 {
-	m_Timer->Update();
 	GLuint shader = m_VertexSandboxShader;
 	glUseProgram(shader);
 
@@ -879,8 +850,6 @@ void Renderer::DrawVertexSandbox()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 	glDrawArrays(GL_TRIANGLES, 0, m_HoriLineVertexCount);
 
@@ -895,10 +864,8 @@ void Renderer::DrawVertexSandbox()
 
 void Renderer::DrawTextureSandbox()
 {
-	m_Timer->Update();
 	GLuint shader = m_TextureSandboxShader;
 	glUseProgram(shader);
-
 
 	GLuint posLoc = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(posLoc);
@@ -914,8 +881,6 @@ void Renderer::DrawTextureSandbox()
 	glActiveTexture(GL_TEXTURE0); // 0번째 슬롯에 넘기며 바인드
 	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture); // 0번째 슬롯에 바인드가 됨
 
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
 
 	glUniform1f(glGetUniformLocation(shader, "u_SeqNum"), g_Time * 30.f);
@@ -927,11 +892,9 @@ void Renderer::DrawTextureSandbox()
 
 void Renderer::DrawGridMesh()
 {
-	m_Timer->Update();
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+	glBindFramebuffer(GL_FRAMEBUFFER, m_C_FBO);
 	glViewport(0, 0, 512, 512);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	GLuint shader = m_GridMeshShader;
 
 	glUseProgram(shader);
@@ -955,16 +918,13 @@ void Renderer::DrawGridMesh()
 
 	glDisableVertexAttribArray(attribPosition);
 
-	static float g_Time = 0.f;
-	g_Time += m_Timer->GetDeltaTime();
-
 	glUniform1f(glGetUniformLocation(shader, "u_Time"), g_Time);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Renderer::DrawTexture(float x, float y, float scaleX, float scaleY, GLuint texID)
 {
-	static float g_Time = 0.f;
-
 	GLuint shader = m_DrawTextureShader;
 	glUseProgram(shader);
 
@@ -985,4 +945,14 @@ void Renderer::DrawTexture(float x, float y, float scaleX, float scaleY, GLuint 
 	glUniform4f(glGetUniformLocation(shader, "u_PosScale"), x, y, scaleX, scaleY);
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void Renderer::DrawFBOTexture()
+{
+	DrawTexture(-0.75, 0.75, 128, 128, m_AFBOTexture);
+	DrawTexture(-0.25, 0.75, 128, 128, m_BFBOTexture);
+	DrawTexture( 0.25, 0.75, 128, 128, m_B_1_FBOTexture);
+	DrawTexture(-0.75, 0.25, 128, 128, m_B_2_FBOTexture);
+	DrawTexture(-0.25, 0.25, 128, 128, m_B_3_FBOTexture);
+	DrawTexture( 0.75, 0.75, 128, 128, m_CFBOTexture);
 }

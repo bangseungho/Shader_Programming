@@ -21,8 +21,9 @@ void Sine()
 
 	float m_T = fract(u_Time * 0.2);
 	vec3 point = vec3(1.0, -1.0, 0.0);
-	vec3 morphPosition = mix(newPosition.xyz, point, m_T);
-	gl_Position = vec4(morphPosition, 1.0);
+//	vec3 morphPosition = mix(newPosition.xyz, point, m_T);
+//	gl_Position = vec4(morphPosition, 1.0);
+	gl_Position = vec4(newPosition.xyz, 1.0);
 
 	float tx = a_Position.x + 0.5;
 	float ty = a_Position.y * -1 + 0.5;

@@ -16,21 +16,23 @@ but WITHOUT ANY WARRANTY.
 #include "Renderer.h"
 
 Renderer *g_Renderer = NULL;
-constexpr int g_WindowSizeX = 1024;
-constexpr int g_WindowSizeY = 1024;
+constexpr int g_WindowSizeX = 512;
+constexpr int g_WindowSizeY = 512;
 
 void RenderScene(void)
 {
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	//glClear(GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	g_Renderer->Update();
 
 	//g_Renderer->DrawAlphaClear();
 	//g_Renderer->DrawVertexSandbox();
 	g_Renderer->DrawFragmentSandbox();
-	//g_Renderer->DrawParticleEffect();
-	//g_Renderer->DrawGridMesh();
+	g_Renderer->DrawGridMesh();
+	g_Renderer->DrawParticleEffect();
 	//g_Renderer->DrawTextureSandbox();
+	g_Renderer->DrawFBOTexture();
 	glutSwapBuffers(); // front -> back, back -> front
 }
 

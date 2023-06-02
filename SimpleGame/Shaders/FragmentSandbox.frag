@@ -1,9 +1,9 @@
 #version 330
 
-layout(location = 1) out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
+layout(location = 1) out vec4 FragColor1;
 layout(location = 2) out vec4 FragColor2;
 layout(location = 3) out vec4 FragColor3;
-layout(location = 4) out vec4 FragColor4;
 
 in vec2 v_TexPos;
 
@@ -56,7 +56,7 @@ void Rader()
 			result += 1.0 * temp2;
 		}
 	}
-	FragColor4 = vec4(0, result.g + 10 * value, 0, result.a + 10 * value);
+	FragColor3 = vec4(0, result.g + 10 * value, 0, result.a + 10 * value);
 }
 
 void Flag()
@@ -75,7 +75,7 @@ void Flag()
 			finalColor += 1 * sinValue * (1 - v_TexPos.x);
 		}
 	}
-	FragColor3 = vec4(finalColor);
+	FragColor1 = vec4(finalColor);
 }
 
 void Ttest()
@@ -129,8 +129,8 @@ void Draw()
 
 void main()
 {
+	Flag();
 	RealFlag();
 	Ttest();
 	Rader();
-	Flag();
 }
