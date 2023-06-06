@@ -27,9 +27,8 @@ private:
 	void CreateOffscreenTexture(GLuint& texID, GLsizei width, GLsizei height);
 	void CreateFBO(GLuint& offScreenTexture, GLuint& depthRenderBuffer, GLuint& texID, GLenum attach);
 	void CreateFBOs();
-
-private:
 	void CreateCheckerboard();
+	void PrepareBloom();
 
 public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
@@ -41,6 +40,11 @@ public:
 	void DrawGridMesh();
 	void DrawTexture(float x, float y, float scaleX, float scaleY, GLuint texID);
 	void DrawFBOTexture();
+	void DrawParticleWidthBloom();
+	
+private:
+	void DrawGaussianBlur(GLuint texID, GLuint targetFBOID, GLuint shader);
+	void DrawMergeBloomTexture(GLuint sceneTexID, GLuint bloomTexID, float exposure);
 
 private:
 	Timer* m_Timer;
@@ -57,38 +61,39 @@ private:
 
 private:
 	// particle
-	GLuint m_ParticleShader = -1;
-	GLuint m_ParticlePositionVBO = -1;
-	GLuint m_ParticleColorVBO = -1;
-	GLuint m_ParticleVelocityVBO = -1;
-	GLuint m_ParticleEmitTimeVBO = -1;
-	GLuint m_ParticleLifeTimeVBO = -1;	
-	GLuint m_ParticlePeriodVBO = -1;
-	GLuint m_ParticleAmpVBO = -1;
-	GLuint m_ParticleValueVBO = -1;
-	GLuint m_ParticlePosColorVelUVVBO = -1;
+	GLuint m_ParticleShader = 0;
+	GLuint m_ParticlePositionVBO = 0;
+	GLuint m_ParticleColorVBO = 0;
+	GLuint m_ParticleVelocityVBO = 0;
+	GLuint m_ParticleEmitTimeVBO = 0;
+	GLuint m_ParticleLifeTimeVBO = 0;
+	GLuint m_ParticlePeriodVBO = 0;
+	GLuint m_ParticleAmpVBO = 0;
+	GLuint m_ParticleValueVBO = 0;
+	GLuint m_ParticlePosColorVelUVVBO = 0;
 
 	// alpha
-	GLuint m_AlphaClearShader = -1;
-	GLuint m_AlphaClearVBO = -1;
+	GLuint m_AlphaClearShader = 0;
+	GLuint m_AlphaClearVBO = 0;
 
 	// VertexSandBox
-	GLuint m_VertexSandboxShader = -1;
-	GLuint m_HoriLineVBO = -1;
+	GLuint m_VertexSandboxShader = 0;
+	GLuint m_HoriLineVBO = 0;
 	GLuint m_HoriLineVertexCount = 0;
 
 	// FragmentSandBox
-	GLuint m_FragmentSandboxShader = -1;
-	GLuint m_FragmentSandboxVBO = -1;
+	GLuint m_FragmentSandboxShader = 0;
+	GLuint m_FragmentSandboxVBO = 0;
 
 	// TextureSandBox
-	GLuint m_TextureSandboxShader = -1;
-	GLuint m_TextureSandboxVBO = -1;
+	GLuint m_TextureSandboxShader = 0;
+	GLuint m_TextureSandboxVBO = 0;
 
 	// Textures
 	GLuint m_CheckerBoardTexture = 0;
 	GLuint m_RGBTexture = 0;
 	GLuint m_HaerinTexture = 0;
+	GLuint m_RightSourceTexture = 0;
 
 	// Rect
 	GLuint m_VBORect = 0;
@@ -113,9 +118,21 @@ private:
 	GLuint m_C_FBO = 0;
 	GLuint m_DepthRenderBuffer = 0;
 
-	// DrawTesture
+	// DrawTexture
 	GLuint m_DrawTextureVBO = 0;
 	GLuint m_DrawTextureShader = 0;
 
+	// Bloom
+	GLuint m_HDRFBO = 0;
+	GLuint m_HDRLowTexture = 0;
+	GLuint m_HDRHeighTexture = 0;
+	GLuint m_PingpongFBO[2] = { 0, 0 };
+	GLuint m_PingpongTexture[2] = { 0, 0 };
+
+	GLuint m_FullRectVBO = 0;
+
+	GLuint m_GaussianBlurHShader = 0;
+	GLuint m_GaussianBlurVShader = 0;
+	GLuint m_DrawMergeTextureShader = 0;
 };
 

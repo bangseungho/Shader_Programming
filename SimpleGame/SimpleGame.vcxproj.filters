@@ -93,6 +93,21 @@
     <None Include="Shaders\DrawTexture.vert">
       <Filter>소스 파일\Shaders</Filter>
     </None>
+    <None Include="Shaders\MergeTexture.frag">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\MergeTexture.vert">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GaussianBlurH.frag">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GaussianBlurV.frag">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\GaussianBlur.vert">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt">

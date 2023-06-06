@@ -16,8 +16,8 @@ but WITHOUT ANY WARRANTY.
 #include "Renderer.h"
 
 Renderer *g_Renderer = NULL;
-constexpr int g_WindowSizeX = 512;
-constexpr int g_WindowSizeY = 512;
+constexpr int g_WindowSizeX = 1024;
+constexpr int g_WindowSizeY = 1024;
 
 void RenderScene(void)
 {
@@ -28,11 +28,12 @@ void RenderScene(void)
 
 	//g_Renderer->DrawAlphaClear();
 	//g_Renderer->DrawVertexSandbox();
-	g_Renderer->DrawFragmentSandbox();
-	g_Renderer->DrawGridMesh();
-	g_Renderer->DrawParticleEffect();
+	//g_Renderer->DrawFragmentSandbox();
+	//g_Renderer->DrawGridMesh();
+	//g_Renderer->DrawParticleEffect();
+	g_Renderer->DrawParticleWidthBloom();
 	//g_Renderer->DrawTextureSandbox();
-	g_Renderer->DrawFBOTexture();
+	//g_Renderer->DrawFBOTexture();
 	glutSwapBuffers(); // front -> back, back -> front
 }
 
@@ -61,7 +62,7 @@ int main(int argc, char **argv)
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(0, 0);
+	glutInitWindowPosition(1024, 200);
 	glutInitWindowSize(g_WindowSizeX, g_WindowSizeY);
 	glutCreateWindow("Game Software Engineering KPU");
 

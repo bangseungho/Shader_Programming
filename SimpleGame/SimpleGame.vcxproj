@@ -186,8 +186,13 @@
     <None Include="Shaders\AlphaClear.vert" />
     <None Include="Shaders\DrawTexture.frag" />
     <None Include="Shaders\DrawTexture.vert" />
+    <None Include="Shaders\GaussianBlur.vert" />
+    <None Include="Shaders\GaussianBlurH.frag" />
+    <None Include="Shaders\GaussianBlurV.frag" />
     <None Include="Shaders\GridMesh.frag" />
     <None Include="Shaders\GridMesh.vert" />
+    <None Include="Shaders\MergeTexture.frag" />
+    <None Include="Shaders\MergeTexture.vert" />
     <None Include="Shaders\Particle.frag" />
     <None Include="Shaders\Particle.vert" />
     <None Include="Shaders\FragmentSandbox.frag" />

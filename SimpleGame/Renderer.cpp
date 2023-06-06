@@ -5,7 +5,8 @@
 using namespace std;
 
 default_random_engine dre;
-uniform_real_distribution urdColor{ 0.f, 1.0f };
+uniform_real_distribution urdColorRGB{ 0.f, 5.0f };
+uniform_real_distribution urdColorA{ 0.f, 1.0f };
 uniform_real_distribution urdPos{ -1.f, 1.f };
 uniform_real_distribution urdVelX{ -1.f, 1.f };
 uniform_real_distribution urdVelY{ 0.f, 2.f };
@@ -42,16 +43,19 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_GridMeshShader = CompileShaders("./Shaders/GridMesh.vert", "./Shaders/GridMesh.frag");
 	m_DrawTextureShader = CompileShaders("./Shaders/DrawTexture.vert", "./Shaders/DrawTexture.frag");
 
+	PrepareBloom();
+
 	// VBOs
-	CreateVertexBufferObjects();
+	//CreateVertexBufferObjects();
 	//CreateCheckerboard();
-	CreateGridMesh();
-	CreateParticle(10000);
+	//CreateGridMesh();
+	CreateParticle(5000);
 
 	// Textures
-	m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
+	//m_RGBTexture = CreatePngTexture("./newj.png", GL_NEAREST);
 	//m_RGBTexture = CreatePngTexture("./rgb.png", GL_NEAREST);
 	m_HaerinTexture = CreatePngTexture("./haerin.png", GL_NEAREST);
+	m_RightSourceTexture = CreatePngTexture("./RightSource.png", GL_NEAREST);
 
 	// FBOs
 	CreateFBOs();
@@ -209,7 +213,7 @@ void Renderer::SetAttribute(int attribLoc, int size, int stride, int offset)
 // Create
 void Renderer::CreateParticle(int numParticle)
 {
-	m_ParticleSize = 0.01f;
+	m_ParticleSize = 0.02f;
 	float centerX = 0.f;
 	float centerY = 0.f;
 	int particleCount = numParticle;
@@ -321,10 +325,10 @@ void Renderer::CreateParticle(int numParticle)
 	for (int i = 0; i < particleCount; ++i) {
 		centerX = 0.f;
 		centerY = 0.f;
-		float colorR = urdColor(dre);
-		float colorG = urdColor(dre);
-		float colorB = urdColor(dre);
-		float colorA = urdColor(dre);
+		float colorR = urdColorRGB(dre);
+		float colorG = urdColorRGB(dre);
+		float colorB = urdColorRGB(dre);
+		float colorA = urdColorA(dre);
 		float velocityX = urdVelX(dre);
 		float velocityY = urdVelY(dre);
 
@@ -615,7 +619,6 @@ GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
 	return temp;
 }
 
-
 void Renderer::CreateOffscreenTexture(GLuint& texID, GLsizei width, GLsizei height)
 {
 	glGenTextures(1, &texID);
@@ -696,6 +699,78 @@ void Renderer::CreateCheckerboard()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
+void Renderer::PrepareBloom()
+{
+	m_GaussianBlurHShader = CompileShaders("./Shaders/GaussianBlur.vert", "./Shaders/GaussianBlurH.frag");
+	m_GaussianBlurVShader = CompileShaders("./Shaders/GaussianBlur.vert", "./Shaders/GaussianBlurV.frag");
+	m_DrawMergeTextureShader = CompileShaders("./Shaders/MergeTexture.vert", "./Shaders/MergeTexture.frag");
+
+	float sizeX = 1.f;
+	float sizeY = 1.f;
+
+	float fullTextureRect[] =
+	{
+		-sizeX,	+sizeY, 0.f,	0.f, 0.f,
+		-sizeX,	-sizeY, 0.f,	0.f, 1.f,
+		+sizeX,	+sizeY, 0.f,	1.f, 0.f,
+		+sizeX,	+sizeY, 0.f,	1.f, 0.f,
+		-sizeX,	-sizeY, 0.f,	0.f, 1.f,
+		+sizeX,	-sizeY, 0.f,	1.f, 1.f
+	};
+
+	glGenBuffers(1, &m_FullRectVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_FullRectVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fullTextureRect), fullTextureRect, GL_STATIC_DRAW);
+
+	// HDR 관련 FBO
+	glGenFramebuffers(1, &m_HDRFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, m_HDRFBO);
+
+	glGenTextures(1, &m_HDRHeighTexture);
+	glBindTexture(GL_TEXTURE_2D, m_HDRHeighTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSizeX, m_WindowSizeY, 0, GL_RGBA, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glGenTextures(1, &m_HDRLowTexture);
+	glBindTexture(GL_TEXTURE_2D, m_HDRLowTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSizeX, m_WindowSizeY, 0, GL_RGBA, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_HDRLowTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_HDRHeighTexture, 0);
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (status != GL_FRAMEBUFFER_COMPLETE) {
+		cout << "fbo creation failed" << endl;
+	}
+
+	// Pingpong 관련 FBO
+	glGenFramebuffers(2, m_PingpongFBO);
+	glGenTextures(2, m_PingpongTexture);
+	for (int i = 0; i < 2; ++i) {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_PingpongFBO[i]);
+		glBindTexture(GL_TEXTURE_2D, m_PingpongTexture[i]);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, m_WindowSizeX, m_WindowSizeY, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_PingpongTexture[i], 0);
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			cout << "fbo creation failed" << endl;
+		}
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 // Draw
 void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a)
 {
@@ -723,33 +798,22 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 
 void Renderer::DrawParticleEffect()
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, m_A_FBO);
-	glViewport(0, 0, 512, 512);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	int shaderProgram = m_ParticleShader;
 	glUseProgram(shaderProgram);
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//int posAttribLoc = SetAttribVBO(shaderProgram, "a_Position", m_ParticlePositionVBO, 3);
-	//int colorAttribLoc = SetAttribVBO(shaderProgram, "a_Color", m_ParticleColorVBO, 3);
-	//int velocityAttribLoc = SetAttribVBO(shaderProgram, "a_Vel", m_ParticleVelocityVBO, 3);
+	int posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
+	int colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");
+	int velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
+	int uvAttribLoc = glGetAttribLocation(shaderProgram, "a_TexPos");
+
 	int emitAttribLoc = SetAttribVBO(shaderProgram, "a_EmitTime", m_ParticleEmitTimeVBO, 1);
 	int lifeAttribLoc = SetAttribVBO(shaderProgram, "a_LifeTime", m_ParticleLifeTimeVBO, 1);
 	int	periodAttribLoc = SetAttribVBO(shaderProgram, "a_Period", m_ParticlePeriodVBO, 1);
 	int ampAttribLoc = SetAttribVBO(shaderProgram, "a_Amp", m_ParticleAmpVBO, 1);
 	int valueAttribLoc = SetAttribVBO(shaderProgram, "a_Value", m_ParticleValueVBO, 1);
-
-	int posAttribLoc = -1;
-	posAttribLoc = glGetAttribLocation(shaderProgram, "a_Position");
-	int colorAttribLoc = -1;
-	colorAttribLoc = glGetAttribLocation(shaderProgram, "a_Color");
-	int velocityAttribLoc = -1;
-	velocityAttribLoc = glGetAttribLocation(shaderProgram, "a_Vel");
-	int uvAttribLoc = -1;
-	uvAttribLoc = glGetAttribLocation(shaderProgram, "a_Texcoord");
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_ParticlePosColorVelUVVBO);
 	SetAttribute(posAttribLoc, 3, 12, 0);
@@ -760,7 +824,7 @@ void Renderer::DrawParticleEffect()
 	GLuint SamplerULoc = glGetUniformLocation(shaderProgram, "u_TexSampler");
 	glUniform1i(SamplerULoc, 0); // 0번째 슬롯에 넘기겠다는 의미
 	glActiveTexture(GL_TEXTURE0); // 0번째 슬롯에 넘기며 바인드
-	glBindTexture(GL_TEXTURE_2D, m_HaerinTexture); // 0번째 슬롯에 바인드가 됨
+	glBindTexture(GL_TEXTURE_2D, m_RightSourceTexture); // 0번째 슬롯에 바인드가 됨
 
 	glUniform1f(glGetUniformLocation(m_ParticleShader, "u_Time"), g_Time);
 
@@ -955,4 +1019,75 @@ void Renderer::DrawFBOTexture()
 	DrawTexture(-0.75, 0.25, 128, 128, m_B_2_FBOTexture);
 	DrawTexture(-0.25, 0.25, 128, 128, m_B_3_FBOTexture);
 	DrawTexture( 0.75, 0.75, 128, 128, m_CFBOTexture);
+}
+
+void Renderer::DrawParticleWidthBloom()
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, m_HDRFBO);
+	GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, drawBuffers);
+	glClear(GL_COLOR_BUFFER_BIT);
+	DrawParticleEffect();
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	DrawGaussianBlur(m_HDRLowTexture, m_PingpongFBO[0], m_GaussianBlurHShader);
+
+	for (int i = 0; i < 20; ++i) {
+		DrawGaussianBlur(m_PingpongTexture[0], m_PingpongFBO[1], m_GaussianBlurVShader);
+		DrawGaussianBlur(m_PingpongTexture[1], m_PingpongFBO[0], m_GaussianBlurHShader);
+	}
+	DrawGaussianBlur(m_PingpongTexture[0], m_PingpongFBO[1], m_GaussianBlurVShader);
+
+	DrawTexture(-0.5, -0.5, 512, 512, m_PingpongTexture[1]);
+	DrawTexture(0.5, -0.5, 512, 512, m_HDRLowTexture);
+
+	DrawMergeBloomTexture(m_HDRLowTexture, m_PingpongTexture[1], 1.f);
+}
+
+void Renderer::DrawGaussianBlur(GLuint texID, GLuint targetFBOID, GLuint shader)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, targetFBOID);
+	glUseProgram(shader);
+
+	int posAttribLoc = glGetAttribLocation(shader, "a_Position");
+
+	int uvAttribLoc = glGetAttribLocation(shader, "a_TexPos");
+
+	GLuint SamplerULoc = glGetUniformLocation(shader, "u_TexSampler");
+	glUniform1i(SamplerULoc, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texID);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_FullRectVBO);
+
+	SetAttribute(posAttribLoc, 3, 5, 0);
+	SetAttribute(uvAttribLoc, 2, 5, 3);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void Renderer::DrawMergeBloomTexture(GLuint sceneTexID, GLuint bloomTexID, float exposure)
+{
+	GLuint shader = m_DrawMergeTextureShader;
+	glUseProgram(shader);
+
+	int posAttribLoc = glGetAttribLocation(shader, "a_Position");
+	int uvAttribLoc = glGetAttribLocation(shader, "a_TexPos");
+
+	glUniform1i(glGetUniformLocation(shader, "u_TexSamplerScene"), 0);
+	glUniform1i(glGetUniformLocation(shader, "u_TexSamplerbloom"), 1);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sceneTexID);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, bloomTexID);
+
+	glUniform1f(glGetUniformLocation(shader, "u_Exposure"), exposure);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_FullRectVBO);
+	SetAttribute(posAttribLoc, 3, 5, 0);
+	SetAttribute(uvAttribLoc, 2, 5, 3);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
